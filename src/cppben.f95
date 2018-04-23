@@ -2,7 +2,8 @@
 
 ! standard header for mex functions
 subroutine mexfunction(nlhs, plhs, nrhs, prhs)
-
+    use cpp
+   
     ! number of input arguments, number of output arguments
     integer      :: nlhs, nrhs
     ! pointer to inputs and outputs
@@ -19,7 +20,7 @@ subroutine mexfunction(nlhs, plhs, nrhs, prhs)
     ! copy the right-hand side argument in matlab to number_in
     call mxCopyPtrToReal8(mxGetPr(prhs(1)), number_in, m)
 
-    call compute
+     call loadcpp
 
     ! do a simple multiplication
     number_out = number_in * 2.0
@@ -31,9 +32,3 @@ subroutine mexfunction(nlhs, plhs, nrhs, prhs)
     call mxCopyReal8ToPtr(number_out, mxGetPr(plhs(1)), 1) 
    
 end subroutine
-
-subroutine compute
-    use cpp
-    call loadcpp
-end subroutine compute
-
