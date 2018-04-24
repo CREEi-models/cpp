@@ -30,17 +30,6 @@ module cpp
 
 	integer			:: cppfirstyear_s1, cppfirstyear_s2	! first year for which we have cpp params for the 2 supplements (last year is the same as the basic CPP)
 	
-type tp_cpphist
-		sequence
-		double precision	:: earnh(58) = -1 	! earning hist from 18 to 75 (to allow for simulations)
-		logical  	:: disabh(16) = .false.	! disability status between 60 and 75- TRUE if disabled
-		! see http://retirehappy.ca/cpp-disability-benefit/
-		logical	:: kid0_6h(58) = .false.	! kid history from 18 to 75 - TRUE if primary caregiver of child under 7
-		! Before 1993, the primary caregiver is the parent who receives Family Allowances (FA). Most often, woman claims it.
-		! Since 1993, it's the parent who receives the Child Tax Benefit (CTB). Less gender biased but still most often, woman claims it.
-		! see http://retirehappy.ca/cpp-crdo-the-bad/   for precise rules of who is primary caregiver  
-   	end type
-
    	contains
    	
 	!load cpp params from cpp.csv file
@@ -49,8 +38,9 @@ type tp_cpphist
 		open(1,file= '../params/cppyear.csv')
 		do i=1,ncppyears
 			read(1,*)buffer, ympe(i), base(i),workcrate(i),empcrate(i),selfcrate(i),arf(i),drc(i), &
-			& nympe(i), reprate(i),gendroprate(i),workcrate_qpp(i),empcrate_qpp(i),selfcrate_qpp(i),gendroprate_qpp(i), &
-			& U1(i),U3(i),U4(i), maxcombined60(i), maxcombined65(i), survagecutoff1(i), survagecutoff2(i), survrate1(i), survrate2(i)
+			 nympe(i), reprate(i),gendroprate(i),workcrate_qpp(i),empcrate_qpp(i),selfcrate_qpp(i),gendroprate_qpp(i), &
+			 U1(i),U3(i),U4(i), maxcombined60(i), maxcombined65(i), survagecutoff1(i), survagecutoff2(i), &
+			 survrate1(i), survrate2(i)
 		end do
 		close(1)
 			
@@ -59,22 +49,30 @@ type tp_cpphist
 			read(1,*)buffer, era(i),nra(i),lra(i)
 		end do
 		close(1)
-			
 	end subroutine loadcpp
 	
+	subroutine getpars(year, params)
+		double precision, intent(out):: params(2)
+		integer, intent(in):: year
+		!call loadcpp
+		params(1) = dble(arf(1))
+		params(2) = dble(drc(1))
+	end subroutine getpars
+
+
+
 	! Find Avg (annual) Pensionable Earning with real rules following the steps of:
 	! http://retirehappy.ca/how-to-calculate-your-cpp-retirement-pension/   
-	subroutine getaape(aape,byear,year,age,cpphist, qcdummy,id)
+	double precision function aape(byear,year,age,earnh,kid0_6h, disabh, qcdummy,id)
 		
 		integer, intent(in)		:: byear,id 	! birth year
 		integer, intent(in)		:: year	! current year 
 		integer, intent(in) 	:: age ! age at which cpp pension starts (60-70); should normally be current age
 		logical, intent(in)     :: qcdummy !true if qc (use qpp instead of cpp)
-		
-		type(tp_cpphist), intent(in) ::cpphist 
-		
-		double precision, intent(out)  ::aape 		! Total Adjusted Pensionable Earning 
-				
+		double precision :: earnh(58)
+		logical disabh(16)
+		logical kid0_6h(58)
+
 		integer 	:: ycstart, ycstop 	! years contribution period starts and year it end	
 		integer 	:: cyears		! number of contributory years
 		integer   :: nydrop 		! number of years to drop for gen dropout
@@ -93,16 +91,14 @@ type tp_cpphist
 		double precision  ::avgympe ! Avg Max Pensionable Earning of the nympe last years
 		double precision  ::avgape 	 ! Avg  Adjusted Pensionable Earning
 		
-		double precision:: earnh(58)=0.0d0
 		double precision:: earntest(58) = 0.0d0
 		
+		call loadcpp
+
 		t= year-cppfirstyear+1
 		bt= byear-cppfirstbyear+1
 			
-		! Change 2010 dollars in CPP history for current values 
-		do i = 1, 58
-			earnh(i) = 	cpphist%earnh(i) 
-		end do
+	
 		! Step 1: Calculate nb of contributory year (should be months for more precision)
 			
 			!Contributory period begins either the month after you turn 18 or in January 1966, whichever is later
@@ -133,7 +129,7 @@ type tp_cpphist
 
 			! check for diability benefit periods from 60 to 64 (era to nra)
 			do i = era(bt),min(age-1 , nra(bt)-1)
-				if(cpphist%disabh(i-60+1))then	! check if disabled in arrays corresponding to yrs from ealy to before normal ret age 
+				if(disabh(i-60+1))then	! check if disabled in arrays corresponding to yrs from ealy to before normal ret age 
 					upe(i-18+1 + min(0, byear-1948)) = 0.0	! exclude income from upe count 					
 					dropped(i-18+1 + min(0, byear-1948)) =  .true.
 				end if	
@@ -161,7 +157,7 @@ type tp_cpphist
 			! CRDO1: Drop any period where children were under age 7 (if prim. caregiver) and earning was
 			! less than basic exemp (UPE=0)	
 				do  i = 1, cyears
-					if(upe(i) ==0.0d0 .and. cpphist%kid0_6h(i) ) then ! kidh(i) assumes contr period starts at 18			
+					if(upe(i) ==0.0d0 .and. kid0_6h(i) ) then ! kidh(i) assumes contr period starts at 18			
 						dropped(i) = .true.	
 					end if		
 				end do	
@@ -171,7 +167,7 @@ type tp_cpphist
 					
 			! CRDO2: Drop any period where child is under age 7 and APE is less than avg APE	
 				do  i = 1, cyears	
-					if(ape(i) <avgape .and. cpphist%kid0_6h(i)) then  ! kidh(i) assumes contr period starts at 18	
+					if(ape(i) <avgape .and. kid0_6h(i)) then  ! kidh(i) assumes contr period starts at 18	
 						upe(i) =0.0d0
 						ape(i) =0.0d0
 						dropped(i) = .true.	
@@ -243,7 +239,7 @@ type tp_cpphist
 			aape =tape/(dble(cyears-count(dropped))-dble(nmdrop)/12.0d0)	
 		
 
-	end subroutine getaape
+	end function aape
 		
 	! Calculate cpp contribution
 	subroutine getcontrib(cppcontr, year, earn, selfearn,age, cpppensiondummy , qcdummy)
@@ -274,31 +270,35 @@ type tp_cpphist
 					
 	end subroutine getcontrib
 	
-	subroutine getbenpaid(cppinc, aape,agecppstart,year,byear, id)
-		integer, intent(in)	::agecppstart ,year, byear,id
+	double precision function ben(aape,agecppstart,byear)
+		integer, intent(in)	::agecppstart ,byear
 		double precision, intent(in)	::aape	
-		double precision, intent(out) :: cppinc
 		integer 					:: ycstart, ycstop, cyears
 		integer	:: t, bt	
 		!Besoin du nombre d'années de cotisations pour trouver l'année où l'individu commence à recevoir ses prestations
 		!C'est cette année là qui doit être utilisée pour trouver le bon tau de remplacement ainsi que les taux pour retraite anticipée/repoussée (arf/drc)
+		!call loadcpp
 		ycstart = max(1966, byear+18)
 		ycstop 	= byear + agecppstart
 		cyears = ycstop-ycstart		
 		t= ycstart - cppfirstyear + cyears +1 !Veut l'année où l'individu commence à recevoir ses prestations
 		bt= byear-cppfirstbyear+1
 	
-		cppinc = reprate(t) *aape
+		ben = reprate(t) *aape
 		if(agecppstart>=nra(bt)) then
-			cppinc = cppinc*(1.00 + drc(t) * min(lra(bt)-nra(bt), agecppstart - nra(bt) )	)
+			ben = ben*(1.00 + drc(t) * min(lra(bt)-nra(bt), agecppstart - nra(bt) )	)
 			!write(*,*) "getbenpaid1,0,",cppinc,",",agecppstart,",",nra(bt),",",&
 			!drc(t),",",min(lra(bt)-nra(bt), agecppstart - nra(bt) ),",",reprate(t),",",aape
 		end if
 		
-		if(agecppstart<nra(bt)) then
-			cppinc = cppinc*(1.00 - arf(t) * min(nra(bt) - era(bt), nra(bt) - agecppstart ))	
-		end if
-	end subroutine getbenpaid
+		if(agecppstart<nra(bt) .and. agecppstart>=era(bt)) then
+			ben = ben*(1.00 - arf(t) * min(nra(bt) - era(bt), nra(bt) - agecppstart ))	
+		end if 
+
+		if (agecppstart<era(bt)) then
+			ben = 0.0d0
+		end if	
+	end function ben
 	
 	
 
