@@ -50,22 +50,12 @@ module cpp
 		end do
 		close(1)
 	end subroutine loadcpp
-	
-	subroutine getpars(year, params)
-		double precision, intent(out):: params(2)
-		integer, intent(in):: year
-		!call loadcpp
-		params(1) = dble(arf(1))
-		params(2) = dble(drc(1))
-	end subroutine getpars
-
-
 
 	! Find Avg (annual) Pensionable Earning with real rules following the steps of:
 	! http://retirehappy.ca/how-to-calculate-your-cpp-retirement-pension/   
-	double precision function aape(byear,year,age,earnh,kid0_6h, disabh, qcdummy,id)
+	double precision function aape(byear,year,age,earnh,qcdummy)
 		
-		integer, intent(in)		:: byear,id 	! birth year
+		integer, intent(in)		:: byear 	! birth year
 		integer, intent(in)		:: year	! current year 
 		integer, intent(in) 	:: age ! age at which cpp pension starts (60-70); should normally be current age
 		logical, intent(in)     :: qcdummy !true if qc (use qpp instead of cpp)
@@ -93,7 +83,8 @@ module cpp
 		
 		double precision:: earntest(58) = 0.0d0
 		
-		call loadcpp
+		disabh(:) = .false.
+		kid0_6h(:) = .false.
 
 		t= year-cppfirstyear+1
 		bt= byear-cppfirstbyear+1
@@ -197,7 +188,7 @@ module cpp
 
 			! After-65-dropout (see Step 6 of http://retirehappy.ca/how-to-calculate-your-cpp-retirement-pension/)
 				
-				if(age>nra(bt) .and. age < 70) then	
+				if(age>nra(bt) .and. age < lra(bt)) then	
 					
 					do i = nra(bt) , age-1  ! age -1 is the last contributory period
 						! If you're still working after 65 (and if these earnings are higher than avgAPE) , you can use these earning to replace any period under age 65
@@ -242,46 +233,42 @@ module cpp
 	end function aape
 		
 	! Calculate cpp contribution
-	subroutine getcontrib(cppcontr, year, earn, selfearn,age, cpppensiondummy , qcdummy)
+	double precision function tax(year, earn, selfearn,age, cpppensiondummy , qcdummy)
 		integer, intent(in)	::year,age
 		double precision, intent(in)	::earn,selfearn	
 		! dummies for receiving cpp pensions and for qpp
 		logical, intent(in) :: cpppensiondummy, qcdummy 
-		double precision, intent(out) :: cppcontr
 		double precision	:: contrearning, diff
 		integer	:: t
 		t= year-cppfirstyear+1
 		if(age<18) then
-		    cppcontr= 0.0
+		    tax= 0.0
 		else if(qcdummy) then 
 			! with qpp, there is no end of contributions when pension begins or with age
 			! worker's contribution - not employer's
-            cppcontr = workcrate_qpp(t)*max(0.0, min(earn,ympe(t))-base(t))   
+            tax = workcrate_qpp(t)*max(0.0, min(earn,ympe(t))-base(t))   
             ! selfearn contributory income on less the part on whivh contribution is already done as an employee
-            cppcontr = cppcontr +  selfcrate_qpp(t) * max(0.0, min(ympe(t)-earn,selfearn-earn) - base(t) ) 
+            tax = tax +  selfcrate_qpp(t) * max(0.0, min(ympe(t)-earn,selfearn-earn) - base(t) ) 
 		else if(age >= 70 .or. cpppensiondummy) then
-            cppcontr = 0.0
+            tax = 0.0
         else
         	! worker's contribution - not employer's
-            cppcontr = workcrate(t)*max(0.0, min(earn,ympe(t))-base(t))   
+            tax = workcrate(t)*max(0.0, min(earn,ympe(t))-base(t))   
             ! selfearn contributory income on less the part on whivh contribution is already done as an employee
-            cppcontr = cppcontr +  selfcrate(t) * max(0.0, min(ympe(t)-earn,selfearn-earn) - base(t) ) 
+            tax = tax +  selfcrate(t) * max(0.0, min(ympe(t)-earn,selfearn-earn) - base(t) ) 
 		end if
 					
-	end subroutine getcontrib
+	end function tax
 	
 	double precision function ben(aape,agecppstart,byear)
 		integer, intent(in)	::agecppstart ,byear
 		double precision, intent(in)	::aape	
 		integer 					:: ycstart, ycstop, cyears
 		integer	:: t, bt	
-		!Besoin du nombre d'années de cotisations pour trouver l'année où l'individu commence à recevoir ses prestations
-		!C'est cette année là qui doit être utilisée pour trouver le bon tau de remplacement ainsi que les taux pour retraite anticipée/repoussée (arf/drc)
-		!call loadcpp
 		ycstart = max(1966, byear+18)
 		ycstop 	= byear + agecppstart
 		cyears = ycstop-ycstart		
-		t= ycstart - cppfirstyear + cyears +1 !Veut l'année où l'individu commence à recevoir ses prestations
+		t= ycstart - cppfirstyear + cyears +1 
 		bt= byear-cppfirstbyear+1
 	
 		ben = reprate(t) *aape
@@ -289,13 +276,9 @@ module cpp
 			ben = ben*(1.00 + drc(t) * min(lra(bt)-nra(bt), agecppstart - nra(bt) )	)
 			!write(*,*) "getbenpaid1,0,",cppinc,",",agecppstart,",",nra(bt),",",&
 			!drc(t),",",min(lra(bt)-nra(bt), agecppstart - nra(bt) ),",",reprate(t),",",aape
-		end if
-		
-		if(agecppstart<nra(bt) .and. agecppstart>=era(bt)) then
+		else if (agecppstart<nra(bt) .and. agecppstart>=era(bt)) then
 			ben = ben*(1.00 - arf(t) * min(nra(bt) - era(bt), nra(bt) - agecppstart ))	
-		end if 
-
-		if (agecppstart<era(bt)) then
+		else 
 			ben = 0.0d0
 		end if	
 	end function ben
