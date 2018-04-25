@@ -53,13 +53,14 @@ module cpp
 
 	! Find Avg (annual) Pensionable Earning with real rules following the steps of:
 	! http://retirehappy.ca/how-to-calculate-your-cpp-retirement-pension/   
-	double precision function aape(byear,year,age,earnh,qcdummy)
+	double precision function aape(byear,year,age,earnh,nearn,qcdummy)
 		
 		integer, intent(in)		:: byear 	! birth year
 		integer, intent(in)		:: year	! current year 
 		integer, intent(in) 	:: age ! age at which cpp pension starts (60-70); should normally be current age
 		logical, intent(in)     :: qcdummy !true if qc (use qpp instead of cpp)
-		double precision :: earnh(58)
+		integer, intent(in) 	:: nearn
+		double precision, intent(in) :: earnh(nearn)
 		logical disabh(16)
 		logical kid0_6h(58)
 
@@ -96,8 +97,8 @@ module cpp
 			ycstart = max(1966, byear+18) 
 			!It ends the month you turn 70 (lra) or the month before your CPP retirement pension starts, whichever is earlier. 
 			ycstop = min(byear+lra(bt),byear+age)
-			cyears= ycstop-ycstart							
-
+			cyears= ycstop-ycstart+1							
+			
 		! Step 2: Calculate Total Adjusted Pensionable Earning (TAPE)
 		
 	
