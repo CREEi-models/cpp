@@ -6,6 +6,8 @@ module cpp
 	parameter (ncppyears = 165, cppfirstyear = 1966, cpplastyear = 2130)
 	integer ncppbyears, cpplastbyear, cppfirstbyear
 	parameter (ncppbyears= 162, cpplastbyear = 2065, cppfirstbyear = 1904)
+	integer:: nearn
+	integer:: years(ncppyears), byears(ncppbyears)
 	integer:: era(ncppbyears)		! youngest age can draw benefits
 	integer:: nra(ncppbyears)		! full or normal claiming age
 	integer:: lra(ncppbyears)		! last age claims
@@ -34,7 +36,8 @@ module cpp
    	
 	!load cpp params from cpp.csv file
 	subroutine loadcpp
-		integer 			::i, buffer     	
+		integer 			::i, buffer
+
 		open(1,file= '../params/cppyear.csv')
 		do i=1,ncppyears
 			read(1,*)buffer, ympe(i), base(i),workcrate(i),empcrate(i),selfcrate(i),arf(i),drc(i), &
@@ -49,20 +52,49 @@ module cpp
 			read(1,*)buffer, era(i),nra(i),lra(i)
 		end do
 		close(1)
+		nearn = maxval(lra) - 18 + 1
+
+		do i = 1, ncppyears, 1
+			years(i) = cppfirstyear + i - 1
+		end do
+		do i = 1, ncppbyears,1 
+			byears(i) = cppfirstbyear + i - 1
+		end do
 	end subroutine loadcpp
+
+
+	subroutine setearn(byear, age, output)
+		integer, intent(in) :: byear, age
+		integer, intent(out) :: output(4)
+		integer :: bt
+			bt = byear - cppfirstbyear + 1
+			output(1) = max(1966, byear+18) 
+			output(2) = min(byear+lra(bt)-1,byear+age-1)
+			output(3) = lra(bt) - 18 + 1
+			output(4) = maxval(lra) - 18 + 1
+	end subroutine setearn
+
+	integer function ypos(year)
+		integer, intent(in):: year
+		ypos = year - cppfirstyear + 1
+	end function ypos
+
+	integer function bpos(byear)
+		integer, intent(in):: byear
+		bpos = byear - cppfirstbyear + 1
+	end function bpos
 
 	! Find Avg (annual) Pensionable Earning with real rules following the steps of:
 	! http://retirehappy.ca/how-to-calculate-your-cpp-retirement-pension/   
-	double precision function aape(byear,year,age,earnh,nearn,qcdummy)
+	double precision function aape(byear,year,age,earnh,qcdummy)
 		
 		integer, intent(in)		:: byear 	! birth year
 		integer, intent(in)		:: year	! current year 
 		integer, intent(in) 	:: age ! age at which cpp pension starts (60-70); should normally be current age
 		logical, intent(in)     :: qcdummy !true if qc (use qpp instead of cpp)
-		integer, intent(in) 	:: nearn
-		double precision, intent(in) :: earnh(nearn)
-		logical disabh(16)
-		logical kid0_6h(58)
+		double precision, intent(in) :: earnh(:)
+		logical :: disabh(nearn)
+		logical :: kid0_6h(nearn)
 
 		integer 	:: ycstart, ycstop 	! years contribution period starts and year it end	
 		integer 	:: cyears		! number of contributory years
@@ -73,31 +105,33 @@ module cpp
 		integer	:: i,h, t , bt
 		integer	::j(1)		! need this to use minloc function
 		
-		double precision::upe(100)  ! Unadjusted Pensionable Earning
-		double precision::ape(100) ! Adjusted Pensionable Earning
+		double precision::upe(nearn)  ! Unadjusted Pensionable Earning
+		double precision::ape(nearn) ! Adjusted Pensionable Earning
 						
-		logical :: dropped(100) ! .true. if period is dropped (disab-CRDP or general dropout)
+		logical :: dropped(nearn) ! .true. if period is dropped (disab-CRDP or general dropout)
 	
 		double precision	::tape	 ! Total Adjusted Pensionable Earning 
 		double precision  ::avgympe ! Avg Max Pensionable Earning of the nympe last years
 		double precision  ::avgape 	 ! Avg  Adjusted Pensionable Earning
 		
-		double precision:: earntest(58) = 0.0d0
+		double precision :: earntest(nearn) 
 		
+		! for now do not input disability years and whether kids present
 		disabh(:) = .false.
 		kid0_6h(:) = .false.
-
-		t= year-cppfirstyear+1
-		bt= byear-cppfirstbyear+1
+		earntest(:) = 0.0d0
+		! find out where will be in grid
+		t= ypos(year)
+		bt= bpos(byear)
 			
 	
 		! Step 1: Calculate nb of contributory year (should be months for more precision)
 			
 			!Contributory period begins either the month after you turn 18 or in January 1966, whichever is later
-			ycstart = max(1966, byear+18) 
+			ycstart = max(cppfirstyear, byear + 18) 
 			!It ends the month you turn 70 (lra) or the month before your CPP retirement pension starts, whichever is earlier. 
-			ycstop = min(byear+lra(bt),byear+age)
-			cyears= ycstop-ycstart+1							
+			ycstop = min(byear+lra(bt),byear+age-1)
+			cyears= ycstop-ycstart							
 			
 		! Step 2: Calculate Total Adjusted Pensionable Earning (TAPE)
 		
@@ -109,11 +143,11 @@ module cpp
 			!First calculate Unadjusted Pensionable Earning (UPE) for each contribution year			
 			!upe = max(0.0, min( earnh(1:cyears),ympe(t))-base(t))  !upe is the amount between base amount and max pen earn
 			! or  it is zero when earning is less than base
-			do i=1, cyears, 1
-				upe(i) = min(earnh(i),ympe(year - cyears - cppfirstyear+i)) ! earnh(i) assumes contr period starts at 18 
+			do i = 1, cyears, 1
+				upe(i) = min(earnh(i),ympe(ypos(ycstart+ i - 1))) ! earnh(i) assumes contr period starts at 18 
 				!write(*,*) "UPE,0,",earnh(i),",",year,",",cyears,",",cppfirstyear,",",i,",",&
 				!	ympe(year - cyears - cppfirstyear+i),",",base(year-cyears -cppfirstyear+i),",",upe(i)
-					if (upe(i) < base(year-cyears -cppfirstyear+i)) then
+					if (upe(i) < base(ypos(ycstart +i - 1))) then
 					upe(i) = 0.0d0
 					end if
 					
@@ -121,7 +155,7 @@ module cpp
 
 			! check for diability benefit periods from 60 to 64 (era to nra)
 			do i = era(bt),min(age-1 , nra(bt)-1)
-				if(disabh(i-60+1))then	! check if disabled in arrays corresponding to yrs from ealy to before normal ret age 
+				if(disabh(i-era(bt)+1))then	! check if disabled in arrays corresponding to yrs from ealy to before normal ret age 
 					upe(i-18+1 + min(0, byear-1948)) = 0.0	! exclude income from upe count 					
 					dropped(i-18+1 + min(0, byear-1948)) =  .true.
 				end if	
@@ -130,11 +164,11 @@ module cpp
 			! Exclude from contr periods
 			!cyears=cyears-count(dropped)
 			! Find avg ympe in the five (nympe) last contr years ending in the yr cpp benefits start
-			avgympe = sum(ympe(ycstop-nympe(t)+1-cppfirstyear+1: ycstop-cppfirstyear+1))/dble(nympe(t))		
+			avgympe = sum(ympe(ypos(ycstop-nympe(t)+1): ypos(ycstop)))/dble(nympe(t))		
 						
 			! Calculate APE for each year: divide UPE by YMPE for each year and then multiply by avgympe
 			do  i = 1, cyears
-				ape(i) = upe(i)/ympe((year- cyears+count(dropped) -cppfirstyear+i))*avgympe 
+				ape(i) = upe(i)/ympe(ypos(ycstart)+i-1)*avgympe 
 				!write(*,*) byear,age,i, earnh(i), ape(i), upe(i)
 			end do
 
