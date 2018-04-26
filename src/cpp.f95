@@ -102,7 +102,7 @@ module cpp
 		integer   :: nmdrop		! number of remaining months to drop (less than 12)
 		integer	:: ngendrop	! number of periods to drop for general dropout
 		
-		integer	:: i,h, t , bt
+		integer	:: i,ii, h, t , bt
 		integer	::j(1)		! need this to use minloc function
 		
 		double precision::upe(nearn)  ! Unadjusted Pensionable Earning
@@ -114,7 +114,7 @@ module cpp
 		double precision  ::avgympe ! Avg Max Pensionable Earning of the nympe last years
 		double precision  ::avgape 	 ! Avg  Adjusted Pensionable Earning
 		integer :: lback
-		double precision :: earntest(nearn) 
+		double precision :: earntest(nearn) , minape
 		
 		! for now do not input disability years and whether kids present
 		disabh(:) = .false.
@@ -164,11 +164,11 @@ module cpp
 			! Exclude from contr periods
 			!cyears=cyears-count(dropped)
 			! Find avg ympe in the five (nympe) last contr years ending in the yr cpp benefits start
-			avgympe = sum(ympe(ypos(ycstop-nympe(t)+1): ypos(ycstop)))/dble(nympe(t))		
+			avgympe = sum(ympe(ypos(ycstop+1-nympe(t)+1): ypos(ycstop+1)))/dble(nympe(t))		
 						
 			! Calculate APE for each year: divide UPE by YMPE for each year and then multiply by avgympe
 			do  i = 1, cyears
-				ape(i) = upe(i)/ympe(ypos(ycstart)+i-1)*avgympe 
+				ape(i) = upe(i)/ympe(ypos(ycstart+i-1))*avgympe 
 				!write(*,*) byear,age,i, earnh(i), ape(i), upe(i)
 			end do
 
@@ -203,22 +203,11 @@ module cpp
 			! General dropout: Drop the X% lowest earning remaining periods.  Everyone's eligible.
 			
 			if(qcdummy) then
-
                 ! number of complete years (12 months) to drop
-                nydrop = floor(gendroprate_qpp(t)*dble(cyears-count(dropped)))
-
-                ! number of remaining months to drop
-                 nmdrop = nint((gendroprate_qpp(t)*dble(cyears-count(dropped))-dble(floor(gendroprate_qpp(t)* &
-                 & dble(cyears-count(dropped)))))*12)
-
-		    else
-				! number of complete years (12 months) to drop	
-				nydrop = floor(gendroprate(t)*dble(cyears-count(dropped)))
-												
-				! number of remaining months to drop 
-				 nmdrop = nint((gendroprate(t)*dble(cyears-count(dropped))-dble(floor(gendroprate(t)* &
-				 & dble(cyears-count(dropped)))))*12)
-
+                nydrop = ceiling(gendroprate_qpp(t)*dble(cyears-count(dropped)))
+     		else
+				! number of complete years (12 months) to drop, ROC increased from 15 to 17% recently
+				nydrop = ceiling(gendroprate(t)*dble(cyears-count(dropped)))								
             end if
 
 			! After-65-dropout (see Step 6 of http://retirehappy.ca/how-to-calculate-your-cpp-retirement-pension/)
@@ -242,26 +231,25 @@ module cpp
 				
 			 ! Find yrs to be dropped (those with lowest income)
 			 	do i=1,nydrop
-			 		j = minloc(ape, .not. dropped)
-			 		upe(j) = 0.0
-			 		ape(j) = 0.0
-			 		dropped(j) = .true.				
-			 	end do 
-				 	 
-			 	if(nmdrop>0) then	! If we have to find a year to partly exclude 
-					j = minloc(ape, .not. dropped)
-					upe(j) = (1.0d0-dble(nmdrop)/dble(12)) * upe(j)
-			 		ape(j) = (1.0d0-dble(nmdrop)/dble(12)) * ape(j) 	 								
-				end if
-		
+			 		j = 1
+			 		minape = 10.0d0
+			 		do ii = 1, cyears, 1
+			 			if (ape(ii) .lt. minape .and. .not. dropped(ii)) then
+			 				j = ii
+			 				minape = ape(ii)
+			 				ape(ii) = 0.0d0
+			 				upe(ii) = 0.0d0
+			 				dropped(ii) = .true.
+			 			end if	
+			 		end do				
+			 	end do 	
 		! Step 4: Calculate Average Annual (should be Monthly) Pensionable Earning (AAPE)	
 			
-			! Recalculate after-dropout TAPE
+			! Recalculate after-dropout TAPE (dropped years have been zeroed out)
 			tape = sum(ape(1:cyears)) 
 
 			! AMPE - divide by cyears minus all dropped years (disab, CRDO1, CRDO2 and General dropout)
-			ampe =tape/(12.0d0*dble(cyears-count(dropped))-dble(nmdrop)/12.0d0)	
-		
+			ampe =tape/(12.0d0*dble(cyears-count(dropped)))	
 
 	end function ampe
 		
@@ -271,24 +259,27 @@ module cpp
 		double precision, intent(in)	::earn,selfearn	
 		! dummies for receiving cpp pensions and for qpp
 		logical, intent(in) :: cpppensiondummy, qcdummy 
-		double precision	:: contrearning, diff
 		integer	:: t
-		t= year-cppfirstyear+1
-		if(age<18) then
-		    tax= 0.0
-		else if(qcdummy) then 
-			! with qpp, there is no end of contributions when pension begins or with age
-			! worker's contribution - not employer's
-            tax = workcrate_qpp(t)*max(0.0, min(earn,ympe(t))-base(t))   
-            ! selfearn contributory income on less the part on whivh contribution is already done as an employee
-            tax = tax +  selfcrate_qpp(t) * max(0.0, min(ympe(t)-earn,selfearn-earn) - base(t) ) 
-		else if(age >= 70 .or. cpppensiondummy) then
-            tax = 0.0
-        else
-        	! worker's contribution - not employer's
-            tax = workcrate(t)*max(0.0, min(earn,ympe(t))-base(t))   
-            ! selfearn contributory income on less the part on whivh contribution is already done as an employee
-            tax = tax +  selfcrate(t) * max(0.0, min(ympe(t)-earn,selfearn-earn) - base(t) ) 
+		t= ypos(year)
+		if (qcdummy) then
+			if (age<18) then
+				tax = 0.0d0
+			else
+				! with qpp, there is no end of contributions when pension begins or with age
+				! worker's contribution - not employer's
+            	tax = workcrate_qpp(t)*max(0.0, min(earn,ympe(t))-base(t))   
+            	! selfearn contributory income on less the part on whivh contribution is already done as an employee
+            	tax = tax +  selfcrate_qpp(t) * max(0.0, min(ympe(t)-earn,selfearn-earn) - base(t) ) 	
+            end if			
+		else
+			if (cpppensiondummy) then
+				tax = 0.0d0
+			else
+	        	! worker's contribution - not employer's
+            	tax = workcrate(t)*max(0.0, min(earn,ympe(t))-base(t))   
+            	! selfearn contributory income on less the part on whivh contribution is already done as an employee
+            	tax = tax +  selfcrate(t) * max(0.0, min(ympe(t)-earn,selfearn-earn) - base(t) ) 	
+            end if				
 		end if
 					
 	end function tax
