@@ -84,9 +84,9 @@ module cpp
 		bpos = byear - cppfirstbyear + 1
 	end function bpos
 
-	! Find Avg (annual) Pensionable Earning with real rules following the steps of:
+	! Find Avg (monthly) Pensionable Earning with real rules following the steps of:
 	! http://retirehappy.ca/how-to-calculate-your-cpp-retirement-pension/   
-	double precision function aape(byear,year,age,earnh,qcdummy)
+	double precision function ampe(byear,year,age,earnh,qcdummy)
 		
 		integer, intent(in)		:: byear 	! birth year
 		integer, intent(in)		:: year	! current year 
@@ -113,7 +113,7 @@ module cpp
 		double precision	::tape	 ! Total Adjusted Pensionable Earning 
 		double precision  ::avgympe ! Avg Max Pensionable Earning of the nympe last years
 		double precision  ::avgape 	 ! Avg  Adjusted Pensionable Earning
-		
+		integer :: lback
 		double precision :: earntest(nearn) 
 		
 		! for now do not input disability years and whether kids present
@@ -131,13 +131,13 @@ module cpp
 			ycstart = max(cppfirstyear, byear + 18) 
 			!It ends the month you turn 70 (lra) or the month before your CPP retirement pension starts, whichever is earlier. 
 			ycstop = min(byear+lra(bt),byear+age-1)
-			cyears= ycstop-ycstart							
+			cyears= ycstop-ycstart+1							
 			
 		! Step 2: Calculate Total Adjusted Pensionable Earning (TAPE)
 		
 	
-			upe=-1.0d0
-			ape=-1.0d0
+			upe=0.0d0
+			ape=0.0d0
 			dropped(:) = .false.
 				
 			!First calculate Unadjusted Pensionable Earning (UPE) for each contribution year			
@@ -154,12 +154,12 @@ module cpp
 			end do
 
 			! check for diability benefit periods from 60 to 64 (era to nra)
-			do i = era(bt),min(age-1 , nra(bt)-1)
-				if(disabh(i-era(bt)+1))then	! check if disabled in arrays corresponding to yrs from ealy to before normal ret age 
-					upe(i-18+1 + min(0, byear-1948)) = 0.0	! exclude income from upe count 					
-					dropped(i-18+1 + min(0, byear-1948)) =  .true.
-				end if	
-			end do
+!			do i = era(bt),min(age-1 , nra(bt)-1)
+!				if(disabh(i-era(bt)+1)) then	! check if disabled in arrays corresponding to yrs from ealy to before normal ret age 
+!					upe(i-18+1 + min(0, byear-1948)) = 0.0	! exclude income from upe count 					
+!					dropped(i-18+1 + min(0, byear-1948)) =  .true.
+!				end if	
+!			end do
 			
 			! Exclude from contr periods
 			!cyears=cyears-count(dropped)
@@ -224,22 +224,20 @@ module cpp
 			! After-65-dropout (see Step 6 of http://retirehappy.ca/how-to-calculate-your-cpp-retirement-pension/)
 				
 				if(age>nra(bt) .and. age < lra(bt)) then	
-					
-					do i = nra(bt) , age-1  ! age -1 is the last contributory period
+					lback = age - nra(bt) - 1
+					do i = cyears ,cyears-lback,-1  ! age -1 is the last contributory period
 						! If you're still working after 65 (and if these earnings are higher than avgAPE) , you can use these earning to replace any period under age 65
 						!write(*,*) age, byear , nra(bt)
-						if(ape(i-18+1 + min(0, byear-1948)) >= avgape) then 
+						if(ape(i) >= avgape) then 
 							nydrop = nydrop + 1 
-						
 						! If you're not working after 65 or if earnings are less than avgAPE, you can drop periods after 65.
 						else
-							upe(i-18+1+ min(0, byear-1948)) =0.0
-							ape(i-18+1+ min(0, byear-1948)) =0.0
-							dropped(i-18+1+ min(0, byear-1948-1)) = .true.	
+							upe(i) =0.0
+							ape(i) =0.0
+							dropped(i) = .true.	
 						end if
 
 					end do
-				
 				end if	
 				
 			 ! Find yrs to be dropped (those with lowest income)
@@ -261,11 +259,11 @@ module cpp
 			! Recalculate after-dropout TAPE
 			tape = sum(ape(1:cyears)) 
 
-			! AAPE - divide by cyears minus all dropped years (disab, CRDO1, CRDO2 and General dropout)
-			aape =tape/(dble(cyears-count(dropped))-dble(nmdrop)/12.0d0)	
+			! AMPE - divide by cyears minus all dropped years (disab, CRDO1, CRDO2 and General dropout)
+			ampe =tape/(12.0d0*dble(cyears-count(dropped))-dble(nmdrop)/12.0d0)	
 		
 
-	end function aape
+	end function ampe
 		
 	! Calculate cpp contribution
 	double precision function tax(year, earn, selfearn,age, cpppensiondummy , qcdummy)
