@@ -5,13 +5,11 @@ import numpy as np
 import pandas as pd
    
 class record:
-    def __init__(self,year,claim=False,earn=0.0,contrib=0.0,ownben=0.0,kids=False,disab=False):
+    def __init__(self,year,earn=0.0,contrib=0.0,kids=False,disab=False):
         self.year = year
         self.earn = earn
         self.contrib = contrib
-        self.ownben = ownben
         self.kids = kids
-        self.claim = claim
         self.disab = disab
 
 class rules:
@@ -75,28 +73,30 @@ class rules:
         return self.byrpars.loc[byear,'nra']
     def lra(self,byear):
         return self.byrpars.loc[byear,'lra']
+    def chgpar(self,name,y0,y1,value):
+        if (name in self.yrspars.columns):
+            for i in range(y0,y1+1):
+                self.yrspars.loc[i,name] = value 
+        else :
+            for i in range(y0,y1+1):
+                self.byrpars.loc[i,name] = value   
 
 class account:
     def __init__(self,byear=None,rules=None):
         self.byear = byear
         self.claimage = None
-        self.history = []   
-        self.nrecord = 0  
+        self.history = []    
         self.ncontrib = 0  
-        self.ape = None
+        self.ampe = 0.0
         self.receiving = False
         self.rules = rules
         self.benefit = 0.0
     def MakeContrib(self,year,earn,kids=False):
-        taxable = np.min([earn,self.rules.ympe(year)])
-        contrib = self.rules.worktax(year) * taxable 
-        years = [self.history[p].year for p in range(self.nrecord)] 
-        if year in years:
-            ix = [i for i in self.history if (i.year == year) and (i.claim == False)] 
-            self.history[ix[0]] = record(year,earn=earn,contrib = contrib,kids=kids)
-        else :
+        if year>=1966:
+            taxable = np.min([earn,self.rules.ympe(year)])
+            contrib = self.rules.worktax(year) * taxable 
+            years = [self.history[p].year for p in range(self.ncontrib)] 
             self.history.append(record(year,earn=earn,contrib = contrib,kids=kids))      
-            self.nrecord +=1
             self.ncontrib +=1
     def ClaimCPP(self,year):
         currage = self.gAge(year)
@@ -119,11 +119,12 @@ class account:
         # parameters
         yr18 = np.max([self.gYear(18),1966])
         yr70 = np.min([self.gYear(70),year])
-        nyrs = yr70-yr18+1
+        nyrs = yr70-yr18
         yrs = [self.history[p].year for p in range(self.ncontrib)]
         ympe = [self.rules.ympe(i) for i in yrs]
         exempt = [self.rules.exempt(i) for i in yrs]
         kids = [self.history[p].kids for p in range(self.ncontrib)]
+        disab = [self.history[p].disab for p in range(self.ncontrib)]
         earn = [self.history[p].earn for p in range(self.ncontrib)]
         nympe = self.rules.nympe(year)
         # unadjusted pensionable earnings
@@ -133,6 +134,13 @@ class account:
         avgympe = np.mean([self.rules.ympe(i) for i in range(year-nympe+1,year+1)])
         # compute ape
         ape = [upe[i]/ympe[i]*avgympe for i in range(self.ncontrib)]
+        # need provision for disability
+        ndrop = 0
+        dropped = np.full(self.ncontrib, False)
+        for i in range(self.ncontrib):
+            if (upe[i]==0.0 and disab[i]==True):
+                dropped[i] = True
+                ndrop +=1        
         # dropout years for childrearing (CRD01)
         ndrop = 0
         dropped = np.full(self.ncontrib, False)
@@ -148,17 +156,21 @@ class account:
                 ape[i] = 0.0
                 dropped[i] = True
                 ndrop +=1
+        # need add provision working past 65
+                
         # General dropout
-        gdrop = np.ceil(self.rules.droprate(year)*(self.ncontrib - ndrop))
-        ape.sort()
+        gdrop = int(np.ceil(self.rules.droprate(year)*(self.ncontrib - ndrop)))
+        apef = [ape[i] for i in range(self.ncontrib) if dropped[i]==False]
+        ixf = np.asarray(apef).argsort()[gdrop-1:]
+        yrsf  = [yrs[i] for i in range(self.ncontrib) if dropped[i]==False]
+        yrstodrop = [yrsf[i] for i in ixf] 
         for i in range(self.ncontrib):
-            if (dropped[i]==False and gdrop>0):
-                ape[i] = 0.0
-                gdrop -=1
+            if (yrs[i] in yrstodrop and gdrop!=0):
+                ape[i] = 0
+                dropped[i] = True
                 ndrop +=1
+                gdrop -=1
         self.ampe = (1/12)*np.sum(ape)/(nyrs - ndrop)
-
-
     def CalcBenefit(self,year):
         if self.receiving==True:
             if (self.gAge(year)==self.claimage):
@@ -172,12 +184,18 @@ class account:
                 else :
                     self.benefit *= 1.0+drc*(age-nra)                       
         else:
-            self.benefit = 0.0
-    def PayBenefit(self,year):
-        if self.receiving==True:
-            self.CalcBenefit(year)
-            self.history.append(record(year,claim=True,ownben=self.benefit)) 
-            self.nrecord +=1           
-
-
+            self.benefit = 0.0          
+    def RunCase(self,retage=60,claimage=65,ratio=1.0):
+        for a in range(18,retage):
+            yr = self.gYear(a)
+            self.MakeContrib(yr,earn=self.rules.ympe(yr)*ratio)
+        self.ClaimCPP(self.gYear(claimage))    
+        return
+    def ResetCase(self):
+        self.claimage = None
+        self.history = []    
+        self.ncontrib = 0  
+        self.ampe = 0.0
+        self.receiving = False
+        self.benefit = 0.0           
 
