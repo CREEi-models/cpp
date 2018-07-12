@@ -16,25 +16,44 @@ class rules:
     def __init__(self,qpp=False):
         bnames = ['byear','era','nra','lra']
         ynames = ['year','ympe','exempt','worker','employer','selfemp','arf','drc','nympe','reprate',
-            'droprate','ape1','ape3','ape4','survmax60', 'survmax65', 'survage1', 'survage2', 
-			 'survrate1', 'survrate2']
+            'droprate','pu1','pu2','pu3','pu4','survmax60', 'survmax65', 'survage1', 'survage2', 
+			 'survrate1', 'survrate2','era','nra','lra','test','supp','disab_rate','disab_base','cola']
         self.qpp = qpp
+        self.start = 1966
+
         if (self.qpp==True):     
-            self.yrspars = pd.read_csv('params/qppyear.csv',names=ynames,delimiter=';')
-            self.byrpars = pd.read_csv('params/qppbyear.csv',names=bnames,delimiter=';')
+            self.yrspars = pd.read_csv('params/qpp_input.csv',names=ynames,delimiter=';')
         else :
-            self.yrspars = pd.read_csv('params/cppyear.csv',names=ynames,delimiter=';')
-            self.byrpars = pd.read_csv('params/cppbyear.csv',names=bnames,delimiter=';')
+            self.yrspars = pd.read_csv('params/cpp_input.csv',names=ynames,delimiter=';')
+        self.stop  = np.max(self.yrspars['year'].values)
         self.yrspars = self.yrspars.set_index('year')
-        self.byrpars = self.byrpars.set_index('byear')
+        self.cpi = 0.02
+        self.wgr = 0.03     
     def ympe(self,year):
-        return self.yrspars.loc[year,'ympe']
+        if (year>self.stop):
+            value = self.yrspars.loc[self.stop,'ympe']
+            value *= (1.0+self.wgr)**(year-self.stop) 
+        else:
+            value = self.yrspars.loc[year,'ympe']
+        return value
     def exempt(self,year):
-        return self.yrspars.loc[year,'exempt']
+        if (year > self.stop):
+            value = self.yrspars.loc[self.stop,'exempt']
+        else :
+           value = self.yrspars.loc[year,'exempt']
+        return value
     def worktax(self,year):
-        return self.yrspars.loc[year,'worker']
+         if (year > self.stop):
+            value = self.yrspars.loc[self.stop,'worker']
+        else :
+           value = self.yrspars.loc[year,'worker']
+        return value
     def empltax(self,year):
-        return self.yrspars.loc[year,'employer']
+         if (year > self.stop):
+            value = self.yrspars.loc[self.stop,'employer']
+        else :
+           value = self.yrspars.loc[year,'employer']
+        return value
     def tax(self,year):
         return self.worktax(year)+self.empltax(year)
     def selftax(self,year):
@@ -94,6 +113,10 @@ class account:
     def MakeContrib(self,year,earn,kids=False):
         if year>=1966:
             taxable = np.min([earn,self.rules.ympe(year)])
+            if taxable > self.rules.exempt(year):
+                taxable -= self.rules.exempt(year)
+            else
+                taxable = 0.0    
             contrib = self.rules.worktax(year) * taxable 
             years = [self.history[p].year for p in range(self.ncontrib)] 
             self.history.append(record(year,earn=earn,contrib = contrib,kids=kids))      
