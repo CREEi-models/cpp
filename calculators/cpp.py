@@ -22,9 +22,9 @@ class rules:
         self.start = 1966
 
         if (self.qpp==True):     
-            self.yrspars = pd.read_csv('params/qpp_input.csv',names=ynames,delimiter=';')
+            self.yrspars = pd.read_excel('params/qpp_history.xlsx',names=ynames)
         else :
-            self.yrspars = pd.read_csv('params/cpp_input.csv',names=ynames,delimiter=';')
+            self.yrspars = pd.read_excel('params/cpp_history.xlsx',names=ynames)
         self.stop  = np.max(self.yrspars['year'].values)
         self.yrspars = self.yrspars.set_index('year')
         self.cpi = 0.02
@@ -43,13 +43,13 @@ class rules:
            value = self.yrspars.loc[year,'exempt']
         return value
     def worktax(self,year):
-         if (year > self.stop):
+        if (year > self.stop):
             value = self.yrspars.loc[self.stop,'worker']
         else :
            value = self.yrspars.loc[year,'worker']
         return value
     def empltax(self,year):
-         if (year > self.stop):
+        if (year > self.stop):
             value = self.yrspars.loc[self.stop,'employer']
         else :
            value = self.yrspars.loc[year,'employer']
@@ -57,41 +57,155 @@ class rules:
     def tax(self,year):
         return self.worktax(year)+self.empltax(year)
     def selftax(self,year):
-        return self.yrspars.loc[year,'selfemp']
+        if (year > self.stop):
+            value = self.yrspars.loc[self.stop,'selfemp']
+        else :
+            value = self.yrspars.loc[year,'selfemp']        
+        return value
     def arf(self,year):
-        return self.yrspars.loc[year,'arf']
+        if (year > self.stop):
+            value = self.yrspars.loc[self.stop,'arf']
+        else :
+            value = self.yrspars.loc[year,'arf']  
+        return value
     def drc(self,year):
-        return self.yrspars.loc[year,'drc']
+        if (year > self.stop):
+            value = self.yrspars.loc[self.stop,'drc']
+        else :
+            value = self.yrspars.loc[year,'drc']  
+        return value
     def nympe(self,year):
-        return self.yrspars.loc[year,'nympe']
+        if (year > self.stop):
+            value = self.yrspars.loc[self.stop,'nympe']
+        else :
+            value = self.yrspars.loc[year,'nympe']  
+        return value
     def reprate(self,year):
-        return self.yrspars.loc[year,'reprate']
+        if (year > self.stop):
+            value = self.yrspars.loc[self.stop,'reprate']
+        else :
+            value = self.yrspars.loc[year,'reprate']  
+        return value        
     def droprate(self,year):
-        return self.yrspars.loc[year,'droprate']
-    def ape1(self,year):
-        return self.yrspars.loc[year,'ape1']
-    def ape3(self,year):
-        return self.yrspars.loc[year,'ape3']
-    def ape4(self,year):
-        return self.yrspars.loc[year,'ape4']
+        if (year > self.stop):
+            value = self.yrspars.loc[self.stop,'droprate']
+        else :
+            value = self.yrspars.loc[year,'droprate']  
+        return value
+    def pu1(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year        
+        return self.yrspars.loc[yr,'pu1']
+    def pu2(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year 
+        return self.yrspars.loc[yr,'pu2']
+    def pu3(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year 
+        return self.yrspars.loc[yr,'pu3']
+    def pu4(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+        return self.yrspars.loc[yr,'pu4']      
     def survmax60(self,year):
-        return self.yrspars.loc[year,'survmax60']
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+        return self.yrspars.loc[yr,'survmax60']
     def survmax65(self,year):
-        return self.yrspars.loc[year,'survmax65']
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'survmax65']
     def survage1(self,year):
-        return self.yrspars.loc[year,'survage1']
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'survage1']
     def survage2(self,year):
-        return self.yrspars.loc[year,'survage2']
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'survage2']
     def survrate1(self,year):
-        return self.yrspars.loc[year,'survrate1']
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'survrate1']
     def survrate2(self,year):
-        return self.yrspars.loc[year,'survrate2']
-    def era(self,byear):
-        return self.byrpars.loc[byear,'era']
-    def nra(self,byear):
-        return self.byrpars.loc[byear,'nra']
-    def lra(self,byear):
-        return self.byrpars.loc[byear,'lra']
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'survrate2']
+    def era(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'era']
+    def nra(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'nra']
+    def test(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'test']
+    def supp(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'supp']
+    def disab_rate(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'disab_rate']
+    def disab_base(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'disab_base']
+    def cola(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+
+        return self.yrspars.loc[yr,'cola']
     def chgpar(self,name,y0,y1,value):
         if (name in self.yrspars.columns):
             for i in range(y0,y1+1):
@@ -115,7 +229,7 @@ class account:
             taxable = np.min([earn,self.rules.ympe(year)])
             if taxable > self.rules.exempt(year):
                 taxable -= self.rules.exempt(year)
-            else
+            else :
                 taxable = 0.0    
             contrib = self.rules.worktax(year) * taxable 
             years = [self.history[p].year for p in range(self.ncontrib)] 
@@ -126,7 +240,7 @@ class account:
         if self.claimage!=None:
             print('already claimed at ',self.claimage,' ...')
         else :
-            if currage >= self.rules.era(self.byear):
+            if currage >= self.rules.era(year):
                 self.claimage = currage
                 self.receiving = True
                 self.CalcAMPE(year)
@@ -140,7 +254,7 @@ class account:
         return self.byear + age
     def CalcAMPE(self,year):
         # parameters
-        yr18 = np.max([self.gYear(18),1966])
+        yr18 = np.max([self.gYear(18),self.rules.start])
         yr70 = np.min([self.gYear(70),year])
         nyrs = yr70-yr18
         yrs = [self.history[p].year for p in range(self.ncontrib)]
@@ -197,7 +311,7 @@ class account:
     def CalcBenefit(self,year):
         if self.receiving==True:
             if (self.gAge(year)==self.claimage):
-                nra = self.rules.nra(self.byear)
+                nra = self.rules.nra(year)
                 arf = self.rules.arf(year)
                 drc = self.rules.drc(year)
                 age = self.gAge(year)

@@ -141,7 +141,7 @@
     \def\gt{>}
     \def\lt{<}
     % Document parameters
-    \title{TestCPP}
+    \title{TestLife}
     
     
     
@@ -280,428 +280,122 @@
     
 
     
-    \section{Calcul des Prestations RRQ et
-RPC}\label{calcul-des-prestations-rrq-et-rpc}
+    \section{Taux de mortalité par province (historique et
+futur)}\label{taux-de-mortalituxe9-par-province-historique-et-futur}
 
-    On a fait un petit module afin de répliquer les calculs qu'on avait dans
-SIMUL. Le tout est encore embryonnaire mais l'essence y est. On commence
-par importer le calculateur
+    On utilise les taux de mortalité historique provenant de la Base de
+donnée sur la longévité canadienne. On y colle les projections futurs de
+StatsCan
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor} }]:} \PY{k+kn}{from} \PY{n+nn}{calculators} \PY{k}{import} \PY{n}{cpp}
+{\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{from} \PY{n+nn}{calculators} \PY{k}{import} \PY{n}{life}
 \end{Verbatim}
 
 
-    On load ensuite les règles du CPP ou QPP. On peut regarder les deux
-tables (paramètres cohortes et années)
+    Le petit module (par default, Quebec, Hommes, scenario moyen pour
+long-terme)
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}11}]:} \PY{n}{qpp} \PY{o}{=} \PY{n}{cpp}\PY{o}{.}\PY{n}{rules}\PY{p}{(}\PY{n}{qpp}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
-         \PY{n}{qpp}\PY{o}{.}\PY{n}{yrspars}
+{\color{incolor}In [{\color{incolor}2}]:} \PY{n}{x} \PY{o}{=} \PY{n}{life}\PY{o}{.}\PY{n}{table}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
 
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}11}]:}           ympe  exempt  worker  employer  selfemp     arf    drc  nympe  \textbackslash{}
-         year                                                                      
-         1966    5000.0     600  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1967    5000.0     600  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1968    5100.0     600  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1969    5200.0     600  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1970    5300.0     600  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1971    5400.0     600  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1972    5500.0     600  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1973    5600.0     600  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1974    6600.0     700  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1975    7400.0     700  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1976    8300.0     800  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1977    9300.0     900  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1978   10400.0    1000  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1979   11700.0    1100  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1980   13100.0    1300  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1981   14700.0    1400  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1982   16500.0    1600  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1983   18500.0    1800  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1984   20800.0    2000  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1985   23400.0    2300  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1986   25800.0    2500  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1987   25900.0    2500  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1988   26500.0    2600  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1989   27700.0    2700  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1990   28900.0    2800  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1991   30500.0    3000  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1992   32200.0    3200  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1993   33400.0    3300  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1994   34400.0    3400  0.0525    0.0525    0.105  0.0624  0.084      5   
-         1995   34900.0    3400  0.0525    0.0525    0.105  0.0624  0.084      5   
-         {\ldots}        {\ldots}     {\ldots}     {\ldots}       {\ldots}      {\ldots}     {\ldots}    {\ldots}    {\ldots}   
-         2101  126125.5    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2102  127386.8    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2103  128660.6    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2104  129947.2    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2105  131246.7    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2106  132559.2    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2107  133884.8    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2108  135223.6    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2109  136575.9    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2110  137941.6    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2111  139321.0    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2112  140714.2    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2113  142121.4    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2114  143542.6    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2115  144978.0    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2116  146427.8    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2117  147892.1    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2118  149371.0    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2119  150864.7    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2120  152373.4    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2121  153897.1    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2122  155436.1    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2123  156990.4    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2124  158560.3    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2125  160145.9    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2126  161747.4    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2127  163364.9    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2128  164998.5    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2129  166648.5    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         2130  168315.0    3500  0.0525    0.0525    0.105  0.0720  0.084      5   
-         
-               reprate  droprate     ape1     ape3    ape4  survmax60  survmax65  \textbackslash{}
-         year                                                                      
-         1966     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1967     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1968     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1969     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1970     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1971     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1972     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1973     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1974     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1975     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1976     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1977     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1978     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1979     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1980     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1981     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1982     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1983     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1984     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1985     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1986     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1987     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1988     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1989     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1990     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1991     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1992     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1993     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1994     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         1995     0.25      0.15 -9999.00 -9999.00 -9999.0   -9999.00   -9999.00   
-         {\ldots}       {\ldots}       {\ldots}      {\ldots}      {\ldots}     {\ldots}        {\ldots}        {\ldots}   
-         2101     0.25      0.15  5589.72  5190.12  1431.6   30072.46   30072.46   
-         2102     0.25      0.15  5589.72  5190.12  1431.6   30373.19   30373.19   
-         2103     0.25      0.15  5589.72  5190.12  1431.6   30676.92   30676.92   
-         2104     0.25      0.15  5589.72  5190.12  1431.6   30983.69   30983.69   
-         2105     0.25      0.15  5589.72  5190.12  1431.6   31293.52   31293.52   
-         2106     0.25      0.15  5589.72  5190.12  1431.6   31606.46   31606.46   
-         2107     0.25      0.15  5589.72  5190.12  1431.6   31922.53   31922.53   
-         2108     0.25      0.15  5589.72  5190.12  1431.6   32241.75   32241.75   
-         2109     0.25      0.15  5589.72  5190.12  1431.6   32564.17   32564.17   
-         2110     0.25      0.15  5589.72  5190.12  1431.6   32889.81   32889.81   
-         2111     0.25      0.15  5589.72  5190.12  1431.6   33218.71   33218.71   
-         2112     0.25      0.15  5589.72  5190.12  1431.6   33550.89   33550.89   
-         2113     0.25      0.15  5589.72  5190.12  1431.6   33886.40   33886.40   
-         2114     0.25      0.15  5589.72  5190.12  1431.6   34225.27   34225.27   
-         2115     0.25      0.15  5589.72  5190.12  1431.6   34567.52   34567.52   
-         2116     0.25      0.15  5589.72  5190.12  1431.6   34913.20   34913.20   
-         2117     0.25      0.15  5589.72  5190.12  1431.6   35262.33   35262.33   
-         2118     0.25      0.15  5589.72  5190.12  1431.6   35614.95   35614.95   
-         2119     0.25      0.15  5589.72  5190.12  1431.6   35971.10   35971.10   
-         2120     0.25      0.15  5589.72  5190.12  1431.6   36330.81   36330.81   
-         2121     0.25      0.15  5589.72  5190.12  1431.6   36694.12   36694.12   
-         2122     0.25      0.15  5589.72  5190.12  1431.6   37061.06   37061.06   
-         2123     0.25      0.15  5589.72  5190.12  1431.6   37431.67   37431.67   
-         2124     0.25      0.15  5589.72  5190.12  1431.6   37805.99   37805.99   
-         2125     0.25      0.15  5589.72  5190.12  1431.6   38184.05   38184.05   
-         2126     0.25      0.15  5589.72  5190.12  1431.6   38565.89   38565.89   
-         2127     0.25      0.15  5589.72  5190.12  1431.6   38951.55   38951.55   
-         2128     0.25      0.15  5589.72  5190.12  1431.6   39341.06   39341.06   
-         2129     0.25      0.15  5589.72  5190.12  1431.6   39734.47   39734.47   
-         2130     0.25      0.15  5589.72  5190.12  1431.6   40131.82   40131.82   
-         
-               survage1  survage2  survrate1  survrate2  
-         year                                            
-         1966        45        65      0.375        0.6  
-         1967        45        65      0.375        0.6  
-         1968        45        65      0.375        0.6  
-         1969        45        65      0.375        0.6  
-         1970        45        65      0.375        0.6  
-         1971        45        65      0.375        0.6  
-         1972        45        65      0.375        0.6  
-         1973        45        65      0.375        0.6  
-         1974        45        65      0.375        0.6  
-         1975        45        65      0.375        0.6  
-         1976        45        65      0.375        0.6  
-         1977        45        65      0.375        0.6  
-         1978        45        65      0.375        0.6  
-         1979        45        65      0.375        0.6  
-         1980        45        65      0.375        0.6  
-         1981        45        65      0.375        0.6  
-         1982        45        65      0.375        0.6  
-         1983        45        65      0.375        0.6  
-         1984        45        65      0.375        0.6  
-         1985        45        65      0.375        0.6  
-         1986        45        65      0.375        0.6  
-         1987        45        65      0.375        0.6  
-         1988        45        65      0.375        0.6  
-         1989        45        65      0.375        0.6  
-         1990        45        65      0.375        0.6  
-         1991        45        65      0.375        0.6  
-         1992        45        65      0.375        0.6  
-         1993        45        65      0.375        0.6  
-         1994        45        65      0.375        0.6  
-         1995        45        65      0.375        0.6  
-         {\ldots}        {\ldots}       {\ldots}        {\ldots}        {\ldots}  
-         2101        45        65      0.375        0.6  
-         2102        45        65      0.375        0.6  
-         2103        45        65      0.375        0.6  
-         2104        45        65      0.375        0.6  
-         2105        45        65      0.375        0.6  
-         2106        45        65      0.375        0.6  
-         2107        45        65      0.375        0.6  
-         2108        45        65      0.375        0.6  
-         2109        45        65      0.375        0.6  
-         2110        45        65      0.375        0.6  
-         2111        45        65      0.375        0.6  
-         2112        45        65      0.375        0.6  
-         2113        45        65      0.375        0.6  
-         2114        45        65      0.375        0.6  
-         2115        45        65      0.375        0.6  
-         2116        45        65      0.375        0.6  
-         2117        45        65      0.375        0.6  
-         2118        45        65      0.375        0.6  
-         2119        45        65      0.375        0.6  
-         2120        45        65      0.375        0.6  
-         2121        45        65      0.375        0.6  
-         2122        45        65      0.375        0.6  
-         2123        45        65      0.375        0.6  
-         2124        45        65      0.375        0.6  
-         2125        45        65      0.375        0.6  
-         2126        45        65      0.375        0.6  
-         2127        45        65      0.375        0.6  
-         2128        45        65      0.375        0.6  
-         2129        45        65      0.375        0.6  
-         2130        45        65      0.375        0.6  
-         
-         [165 rows x 19 columns]
-\end{Verbatim}
-            
+    Evolution des taux de mortalite par age
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}12}]:} \PY{n}{qpp}\PY{o}{.}\PY{n}{byrpars}
+{\color{incolor}In [{\color{incolor}3}]:} \PY{o}{\PYZpc{}}\PY{k}{matplotlib} inline
+        \PY{k+kn}{from} \PY{n+nn}{matplotlib} \PY{k}{import} \PY{n}{pyplot} \PY{k}{as} \PY{n}{plt}
+        \PY{n}{ages} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{30}\PY{p}{,}\PY{l+m+mi}{40}\PY{p}{,}\PY{l+m+mi}{50}\PY{p}{,}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mi}{70}\PY{p}{,}\PY{l+m+mi}{80}\PY{p}{]}
+        \PY{n}{years} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1921}\PY{p}{,}\PY{l+m+mi}{2063}\PY{p}{)}\PY{p}{]}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+        \PY{k}{for} \PY{n}{age} \PY{o+ow}{in} \PY{n}{ages}\PY{p}{:}
+            \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{years}\PY{p}{,}\PY{n}{x}\PY{o}{.}\PY{n}{tab}\PY{p}{[}\PY{n+nb}{str}\PY{p}{(}\PY{n}{age}\PY{p}{)}\PY{p}{]}\PY{p}{,}\PY{n}{label}\PY{o}{=}\PY{n+nb}{str}\PY{p}{(}\PY{n}{age}\PY{p}{)}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{year}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mortality rate}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
 
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}12}]:}        era  nra  lra
-         byear               
-         1904    60   65   70
-         1905    60   65   70
-         1906    60   65   70
-         1907    60   65   70
-         1908    60   65   70
-         1909    60   65   70
-         1910    60   65   70
-         1911    60   65   70
-         1912    60   65   70
-         1913    60   65   70
-         1914    60   65   70
-         1915    60   65   70
-         1916    60   65   70
-         1917    60   65   70
-         1918    60   65   70
-         1919    60   65   70
-         1920    60   65   70
-         1921    60   65   70
-         1922    60   65   70
-         1923    60   65   70
-         1924    60   65   70
-         1925    60   65   70
-         1926    60   65   70
-         1927    60   65   70
-         1928    60   65   70
-         1929    60   65   70
-         1930    60   65   70
-         1931    60   65   70
-         1932    60   65   70
-         1933    60   65   70
-         {\ldots}    {\ldots}  {\ldots}  {\ldots}
-         2036    60   65   70
-         2037    60   65   70
-         2038    60   65   70
-         2039    60   65   70
-         2040    60   65   70
-         2041    60   65   70
-         2042    60   65   70
-         2043    60   65   70
-         2044    60   65   70
-         2045    60   65   70
-         2046    60   65   70
-         2047    60   65   70
-         2048    60   65   70
-         2049    60   65   70
-         2050    60   65   70
-         2051    60   65   70
-         2052    60   65   70
-         2053    60   65   70
-         2054    60   65   70
-         2055    60   65   70
-         2056    60   65   70
-         2057    60   65   70
-         2058    60   65   70
-         2059    60   65   70
-         2060    60   65   70
-         2061    60   65   70
-         2062    60   65   70
-         2063    60   65   70
-         2064    60   65   70
-         2065    60   65   70
-         
-         [162 rows x 3 columns]
-\end{Verbatim}
-            
-    On peut facilement obtenir un paramètres en l'appelant par son nom et
-l'année
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_6_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    Taux de survie par cohorte d'un age a un autre:
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}13}]:} \PY{n+nb}{print}\PY{p}{(}\PY{n}{qpp}\PY{o}{.}\PY{n}{era}\PY{p}{(}\PY{l+m+mi}{1958}\PY{p}{)}\PY{p}{,}\PY{n}{qpp}\PY{o}{.}\PY{n}{arf}\PY{p}{(}\PY{l+m+mi}{2018}\PY{p}{)}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}4}]:} \PY{n}{data} \PY{o}{=} \PY{p}{[}\PY{n}{x}\PY{o}{.}\PY{n}{sx}\PY{p}{(}\PY{n}{b}\PY{p}{,}\PY{l+m+mi}{65}\PY{p}{,}\PY{l+m+mi}{85}\PY{p}{)} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
+        \PY{n}{byrs} \PY{o}{=} \PY{p}{[}\PY{n}{b} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{byrs}\PY{p}{,}\PY{n}{data}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{birth cohort}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{probability survives to 85 given age 65}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-60 0.07200000000000001
-
-    \end{Verbatim}
-
-    Important: Il faut maintenant valider les paramètres historiques. Jeiel
-va m'aider sur ceci dès que possible.
-
-    On peut maintenant créer un compte au rrq de la façon suivante (ou 1958
-est l'année de naissance et on input les règles):
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_8_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    Pour moi et David:
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}14}]:} \PY{n}{pc} \PY{o}{=} \PY{n}{cpp}\PY{o}{.}\PY{n}{account}\PY{p}{(}\PY{l+m+mi}{1958}\PY{p}{,}\PY{n}{rules}\PY{o}{=}\PY{n}{qpp}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}5}]:} \PY{n}{ex} \PY{o}{=}  \PY{p}{[}\PY{n}{x}\PY{o}{.}\PY{n}{ex}\PY{p}{(}\PY{n}{b}\PY{p}{,}\PY{l+m+mi}{40}\PY{p}{)} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{byrs}\PY{p}{,}\PY{n}{ex}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{birth year}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{life expectancy at 40}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
 
-    Il y a plusieurs fonctions dans cpp. On note la fonction qui permet de
-faire des contributions, celle permettant de claimer, de calculer le
-ampe (moyenne des gains pensionnable), de calculer les prestations.
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_10_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    Plus sérieusement pour le RRQ:
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}15}]:} \PY{n+nb}{dir}\PY{p}{(}\PY{n}{pc}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}6}]:} \PY{n}{ex} \PY{o}{=}  \PY{p}{[}\PY{n}{x}\PY{o}{.}\PY{n}{ex}\PY{p}{(}\PY{n}{b}\PY{p}{,}\PY{l+m+mi}{60}\PY{p}{)} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{byrs}\PY{p}{,}\PY{n}{ex}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{birth year}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{life expectancy at 60}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
 
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}15}]:} ['CalcAMPE',
-          'CalcBenefit',
-          'ClaimCPP',
-          'MakeContrib',
-          'ResetCase',
-          'RunCase',
-          '\_\_class\_\_',
-          '\_\_delattr\_\_',
-          '\_\_dict\_\_',
-          '\_\_dir\_\_',
-          '\_\_doc\_\_',
-          '\_\_eq\_\_',
-          '\_\_format\_\_',
-          '\_\_ge\_\_',
-          '\_\_getattribute\_\_',
-          '\_\_gt\_\_',
-          '\_\_hash\_\_',
-          '\_\_init\_\_',
-          '\_\_init\_subclass\_\_',
-          '\_\_le\_\_',
-          '\_\_lt\_\_',
-          '\_\_module\_\_',
-          '\_\_ne\_\_',
-          '\_\_new\_\_',
-          '\_\_reduce\_\_',
-          '\_\_reduce\_ex\_\_',
-          '\_\_repr\_\_',
-          '\_\_setattr\_\_',
-          '\_\_sizeof\_\_',
-          '\_\_str\_\_',
-          '\_\_subclasshook\_\_',
-          '\_\_weakref\_\_',
-          'ampe',
-          'benefit',
-          'byear',
-          'claimage',
-          'gAge',
-          'gYear',
-          'history',
-          'ncontrib',
-          'receiving',
-          'rules']
-\end{Verbatim}
-            
-    Une fonction en particulier est intéressante, RunCase(). Elle permet de
-rouler un cas avec des contributions en ratio de YMPE, un age de
-retraite (ou les cotisations arrete) et un age de debut des prestations.
-En voici un petit exemple. Il faut faire un Reset avant de refaire un
-cas.
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_12_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    Et finalement, le prix d'une rente a 60 ans (1\$ de rente) avec
+différents taux de rendement
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}23}]:} \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
-         
-         \PY{k}{for} \PY{n}{a} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mi}{70}\PY{p}{)}\PY{p}{:}
-             \PY{n}{pc}\PY{o}{.}\PY{n}{RunCase}\PY{p}{(}\PY{n}{claimage}\PY{o}{=}\PY{n}{a}\PY{p}{,}\PY{n}{retage}\PY{o}{=}\PY{n}{a}\PY{p}{,}\PY{n}{ratio}\PY{o}{=}\PY{l+m+mf}{1.0}\PY{p}{)}
-             \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{if claims at }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{a}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ gets }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{round}\PY{p}{(}\PY{n}{pc}\PY{o}{.}\PY{n}{benefit}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)}
-             \PY{n}{pc}\PY{o}{.}\PY{n}{ResetCase}\PY{p}{(}\PY{p}{)} 
+{\color{incolor}In [{\color{incolor}9}]:} \PY{n}{ann1} \PY{o}{=}  \PY{p}{[}\PY{n}{x}\PY{o}{.}\PY{n}{ann}\PY{p}{(}\PY{n}{b}\PY{p}{,}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mf}{0.03}\PY{p}{)} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
+        \PY{n}{ann2} \PY{o}{=}  \PY{p}{[}\PY{n}{x}\PY{o}{.}\PY{n}{ann}\PY{p}{(}\PY{n}{b}\PY{p}{,}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mf}{0.01}\PY{p}{)} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
+        
+        \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{byrs}\PY{p}{,}\PY{n}{ann1}\PY{p}{,}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{3 pct real return}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{byrs}\PY{p}{,}\PY{n}{ann2}\PY{p}{,}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{1 pct real return}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{birth year}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{price of annuity}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-if claims at  60  gets  725.87
-if claims at  61  gets  817.25
-if claims at  62  gets  908.82
-if claims at  63  gets  999.41
-if claims at  64  gets  1091.85
-if claims at  65  gets  1185.48
-if claims at  66  gets  1297.91
-if claims at  67  gets  1412.47
-if claims at  68  gets  1529.2
-if claims at  69  gets  1648.11
-
-    \end{Verbatim}
-
-    On peut faire maintenant pour un multiple du ympe
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}26}]:} \PY{k}{for} \PY{n}{a} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mi}{70}\PY{p}{)}\PY{p}{:}
-             \PY{n}{pc}\PY{o}{.}\PY{n}{RunCase}\PY{p}{(}\PY{n}{claimage}\PY{o}{=}\PY{n}{a}\PY{p}{,}\PY{n}{retage}\PY{o}{=}\PY{n}{a}\PY{p}{,}\PY{n}{ratio}\PY{o}{=}\PY{l+m+mf}{0.5}\PY{p}{)}
-             \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{if claims at }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{a}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ gets }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{round}\PY{p}{(}\PY{n}{pc}\PY{o}{.}\PY{n}{benefit}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)}
-             \PY{n}{pc}\PY{o}{.}\PY{n}{ResetCase}\PY{p}{(}\PY{p}{)} 
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-if claims at  60  gets  362.93
-if claims at  61  gets  408.62
-if claims at  62  gets  454.41
-if claims at  63  gets  499.7
-if claims at  64  gets  545.92
-if claims at  65  gets  592.74
-if claims at  66  gets  648.96
-if claims at  67  gets  706.24
-if claims at  68  gets  764.6
-if claims at  69  gets  824.06
-
-    \end{Verbatim}
-
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_14_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
 
     % Add a bibliography block to the postdoc
     
