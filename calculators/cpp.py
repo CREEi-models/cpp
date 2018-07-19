@@ -34,7 +34,7 @@ class rules:
             value = self.yrspars.loc[self.stop,'ympe']
             value *= (1.0+self.wgr)**(year-self.stop) 
         else:
-            value = self.yrspars.loc[year,'ympe']
+            value = self.yrspars.loc[self.stop,'ympe']
         return value
     def exempt(self,year):
         if (year > self.stop):
@@ -60,7 +60,7 @@ class rules:
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'selfemp']
         else :
-            value = self.yrspars.loc[year,'selfemp']        
+            value = self.yrspars.loc[self.stop,'selfemp']        
         return value
     def arf(self,year):
         if (year > self.stop):
@@ -225,7 +225,7 @@ class account:
         self.rules = rules
         self.benefit = 0.0
     def MakeContrib(self,year,earn,kids=False):
-        if year>=1966:
+        if year>=self.rules.start:
             taxable = np.min([earn,self.rules.ympe(year)])
             if taxable > self.rules.exempt(year):
                 taxable -= self.rules.exempt(year)

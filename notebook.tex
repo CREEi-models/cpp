@@ -141,7 +141,7 @@
     \def\gt{>}
     \def\lt{<}
     % Document parameters
-    \title{TestLife}
+    \title{Incitations}
     
     
     
@@ -280,119 +280,189 @@
     
 
     
-    \section{Taux de mortalité par province (historique et
-futur)}\label{taux-de-mortalituxe9-par-province-historique-et-futur}
+    \section{Incitations RRQ}\label{incitations-rrq}
 
-    On utilise les taux de mortalité historique provenant de la Base de
-donnée sur la longévité canadienne. On y colle les projections futurs de
-StatsCan
+    Dans ce notebook, on calcule le gain marginal a reporter le début de la
+rente retraite du RRQ. Nous avons construit un calculateur des rentes
+(cpp), un outils pour obtenir des taux de survie historique et
+prospectifs. Quelques notes sur chacun des éléments:
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{from} \PY{n+nn}{calculators} \PY{k}{import} \PY{n}{life}
-\end{Verbatim}
+    RRQ: - prise en compte de la rente retraite seulement et des pénalités
+actuarielles pour prestation anticipé et retardé.
 
-
-    Le petit module (par default, Quebec, Hommes, scenario moyen pour
-long-terme)
+Survie: - taux historique venant de la Banque de donnée sur la longévité
+canadienne et taux prospectif par province de Statistiques Canada
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}2}]:} \PY{n}{x} \PY{o}{=} \PY{n}{life}\PY{o}{.}\PY{n}{table}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    Evolution des taux de mortalite par age
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}3}]:} \PY{o}{\PYZpc{}}\PY{k}{matplotlib} inline
+{\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{from} \PY{n+nn}{calculators} \PY{k}{import} \PY{n}{cpp}
+        \PY{k+kn}{from} \PY{n+nn}{calculators} \PY{k}{import} \PY{n}{life}
+        \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
         \PY{k+kn}{from} \PY{n+nn}{matplotlib} \PY{k}{import} \PY{n}{pyplot} \PY{k}{as} \PY{n}{plt}
-        \PY{n}{ages} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{30}\PY{p}{,}\PY{l+m+mi}{40}\PY{p}{,}\PY{l+m+mi}{50}\PY{p}{,}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mi}{70}\PY{p}{,}\PY{l+m+mi}{80}\PY{p}{]}
-        \PY{n}{years} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1921}\PY{p}{,}\PY{l+m+mi}{2063}\PY{p}{)}\PY{p}{]}
+        \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
+\end{Verbatim}
+
+
+    On va chercher les taux de survie (nous supposerons un homme au Québec)
+:
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}2}]:} \PY{n}{l} \PY{o}{=} \PY{n}{life}\PY{o}{.}\PY{n}{table}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    On va chercher les règles du RRQ
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}3}]:} \PY{n}{qpp} \PY{o}{=} \PY{n}{cpp}\PY{o}{.}\PY{n}{rules}\PY{p}{(}\PY{n}{qpp}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+
+
+    Le module cpp contient un routine permettant de calculer un cas juqu'au
+début des prestations. Nous allons rouler ce cas jusqu'à l'âge de 60 ans
+(il aura fait au moins des contributions jusqu'à l'âge de 59 ans). Nous
+le ferons dans un contexte simple au départ. L'individu est né en 1958
+et à 59 ans en 2017, 60 ans en 2018.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}4}]:} \PY{n}{byr} \PY{o}{=} \PY{l+m+mi}{1958}
+        \PY{n}{case} \PY{o}{=} \PY{n}{cpp}\PY{o}{.}\PY{n}{account}\PY{p}{(}\PY{n}{byr}\PY{p}{,}\PY{n}{rules}\PY{o}{=}\PY{n}{qpp}\PY{p}{)}
+\end{Verbatim}
+
+
+    Allons chercher les probabilités de survie étant donné qu'il a 60 ans:
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}5}]:} \PY{n}{sx} \PY{o}{=} \PY{p}{[}\PY{n}{l}\PY{o}{.}\PY{n}{sx}\PY{p}{(}\PY{n}{byr}\PY{p}{,}\PY{l+m+mi}{60}\PY{p}{,}\PY{n}{a}\PY{p}{)} \PY{k}{for} \PY{n}{a} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mi}{111}\PY{p}{)}\PY{p}{]}
+        \PY{n}{ages} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mi}{111}\PY{p}{)}\PY{p}{]}
         \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-        \PY{k}{for} \PY{n}{age} \PY{o+ow}{in} \PY{n}{ages}\PY{p}{:}
-            \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{years}\PY{p}{,}\PY{n}{x}\PY{o}{.}\PY{n}{tab}\PY{p}{[}\PY{n+nb}{str}\PY{p}{(}\PY{n}{age}\PY{p}{)}\PY{p}{]}\PY{p}{,}\PY{n}{label}\PY{o}{=}\PY{n+nb}{str}\PY{p}{(}\PY{n}{age}\PY{p}{)}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{year}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mortality rate}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{ages}\PY{p}{,}\PY{n}{sx}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{age}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{probabilite survie a age etant donne 60}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+        \PY{n}{sx} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{n+nb}{zip}\PY{p}{(}\PY{n}{ages}\PY{p}{,}\PY{n}{sx}\PY{p}{)}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_6_0.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_11_0.png}
     \end{center}
     { \hspace*{\fill} \\}
     
-    Taux de survie par cohorte d'un age a un autre:
+    Son esperance de vie residuelle (apres 60 ans) est
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}4}]:} \PY{n}{data} \PY{o}{=} \PY{p}{[}\PY{n}{x}\PY{o}{.}\PY{n}{sx}\PY{p}{(}\PY{n}{b}\PY{p}{,}\PY{l+m+mi}{65}\PY{p}{,}\PY{l+m+mi}{85}\PY{p}{)} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
-        \PY{n}{byrs} \PY{o}{=} \PY{p}{[}\PY{n}{b} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{byrs}\PY{p}{,}\PY{n}{data}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{birth cohort}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{probability survives to 85 given age 65}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}6}]:} \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{e60 = }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{l}\PY{o}{.}\PY{n}{ex}\PY{p}{(}\PY{n}{byr}\PY{p}{,}\PY{l+m+mi}{60}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+e60 =  24.928808875806567
+
+    \end{Verbatim}
+
+    On va maintenant rouler 10 cas pour chacun des ages possibles. A chaque
+fois on va suppose qu'il ne continue pas a travailler apres 60 ans et
+qu'il a toujours gagne le MGA:
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}7}]:} \PY{n}{benefits} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+        \PY{n}{claimages} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mi}{70}\PY{p}{)}\PY{p}{]}
+        \PY{k}{for} \PY{n}{a} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mi}{70}\PY{p}{)}\PY{p}{:}
+            \PY{n}{case}\PY{o}{.}\PY{n}{RunCase}\PY{p}{(}\PY{n}{claimage}\PY{o}{=}\PY{n}{a}\PY{p}{,}\PY{n}{retage}\PY{o}{=}\PY{l+m+mi}{60}\PY{p}{,}\PY{n}{ratio}\PY{o}{=}\PY{l+m+mf}{1.0}\PY{p}{)}
+            \PY{n}{benefits}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{case}\PY{o}{.}\PY{n}{benefit}\PY{p}{)}
+            \PY{n}{case}\PY{o}{.}\PY{n}{ResetCase}\PY{p}{(}\PY{p}{)} 
+        \PY{n}{brrq} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{n+nb}{zip}\PY{p}{(}\PY{n}{claimages}\PY{p}{,}\PY{n}{benefits}\PY{p}{)}\PY{p}{)}
+        \PY{n+nb}{print}\PY{p}{(}\PY{n}{brrq}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+\{60: 745.3333333333333, 61: 810.9873657407405, 62: 879.381885855856, 63: 951.902619410965, 64: 1029.8543663442222, 65: 1114.473326940932, 66: 1213.982203898624, 67: 1315.217781886009, 68: 1418.3297666051035, 69: 1523.46454191272\}
+
+    \end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}8}]:} \PY{n}{sx}\PY{p}{[}\PY{l+m+mi}{60}\PY{p}{]}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}8}]:} 1.0
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}9}]:} \PY{n}{npv} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+        \PY{n}{rate} \PY{o}{=} \PY{l+m+mf}{0.03}
+        \PY{k}{for} \PY{n}{a} \PY{o+ow}{in} \PY{n}{claimages}\PY{p}{:}
+            \PY{n}{npv}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{[}\PY{n}{np}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n}{rate}\PY{o}{*}\PY{p}{(}\PY{n}{aa}\PY{o}{\PYZhy{}}\PY{l+m+mi}{60}\PY{p}{)}\PY{p}{)}\PY{o}{*}\PY{n}{brrq}\PY{p}{[}\PY{n}{a}\PY{p}{]}\PY{o}{*}\PY{l+m+mi}{12}\PY{o}{*}\PY{n}{sx}\PY{p}{[}\PY{n}{aa}\PY{p}{]} \PY{k}{for} \PY{n}{aa} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{a}\PY{p}{,}\PY{l+m+mi}{111}\PY{p}{)}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+        \PY{n}{npv} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{n+nb}{zip}\PY{p}{(}\PY{n}{claimages}\PY{p}{,}\PY{n}{npv}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}10}]:} \PY{p}{[}\PY{n+nb}{print}\PY{p}{(}\PY{n}{a}\PY{p}{,}\PY{n}{np}\PY{o}{.}\PY{n}{round}\PY{p}{(}\PY{n}{npv}\PY{p}{[}\PY{n}{a}\PY{p}{]}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)} \PY{k}{for} \PY{n}{a} \PY{o+ow}{in} \PY{n}{claimages}\PY{p}{]}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+60 153584.0
+61 157381.0
+62 160484.0
+63 163114.0
+64 165427.0
+65 167520.0
+66 170433.0
+67 172109.0
+68 172621.0
+69 172042.0
+
+    \end{Verbatim}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}10}]:} [None, None, None, None, None, None, None, None, None, None]
+\end{Verbatim}
+            
+    Le gain a reporter en dollars (en valeur d'option) est donne par:
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}11}]:} \PY{n}{acc} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+         \PY{k}{for} \PY{n}{a} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mi}{69}\PY{p}{)}\PY{p}{:}
+             \PY{n}{maxnpv} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{max}\PY{p}{(}\PY{p}{[}\PY{n}{npv}\PY{p}{[}\PY{n}{x}\PY{p}{]} \PY{k}{for} \PY{n}{x} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{a}\PY{o}{+}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{70}\PY{p}{)}\PY{p}{]}\PY{p}{)}
+             \PY{n}{acc}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{maxnpv} \PY{o}{\PYZhy{}} \PY{n}{npv}\PY{p}{[}\PY{n}{a}\PY{p}{]}\PY{p}{)}
+         \PY{n}{acc} \PY{o}{=} \PY{n+nb}{dict}\PY{p}{(}\PY{n+nb}{zip}\PY{p}{(}\PY{n}{claimages}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,}\PY{n}{acc}\PY{p}{)}\PY{p}{)}
+         \PY{p}{[}\PY{n+nb}{print}\PY{p}{(}\PY{n}{a}\PY{p}{,}\PY{n}{np}\PY{o}{.}\PY{n}{round}\PY{p}{(}\PY{n}{acc}\PY{p}{[}\PY{n}{a}\PY{p}{]}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)} \PY{k}{for} \PY{n}{a} \PY{o+ow}{in} \PY{n}{claimages}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+60 19037.0
+61 15240.0
+62 12138.0
+63 9507.0
+64 7194.0
+65 5102.0
+66 2188.0
+67 513.0
+68 -579.0
+
+    \end{Verbatim}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}11}]:} [None, None, None, None, None, None, None, None, None]
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}12}]:} \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{bar}\PY{p}{(}\PY{n}{claimages}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,}\PY{p}{[}\PY{n}{acc}\PY{p}{[}\PY{n}{a}\PY{p}{]} \PY{k}{for} \PY{n}{a} \PY{o+ow}{in} \PY{n}{claimages}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{age quand debute prestations}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gain a reporter a un age futur}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{axhline}\PY{p}{(}\PY{n}{y}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{r}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{linestyle}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_8_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    Pour moi et David:
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}5}]:} \PY{n}{ex} \PY{o}{=}  \PY{p}{[}\PY{n}{x}\PY{o}{.}\PY{n}{ex}\PY{p}{(}\PY{n}{b}\PY{p}{,}\PY{l+m+mi}{40}\PY{p}{)} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{byrs}\PY{p}{,}\PY{n}{ex}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{birth year}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{life expectancy at 40}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_10_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    Plus sérieusement pour le RRQ:
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}6}]:} \PY{n}{ex} \PY{o}{=}  \PY{p}{[}\PY{n}{x}\PY{o}{.}\PY{n}{ex}\PY{p}{(}\PY{n}{b}\PY{p}{,}\PY{l+m+mi}{60}\PY{p}{)} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{byrs}\PY{p}{,}\PY{n}{ex}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{birth year}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{life expectancy at 60}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_12_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    Et finalement, le prix d'une rente a 60 ans (1\$ de rente) avec
-différents taux de rendement
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}9}]:} \PY{n}{ann1} \PY{o}{=}  \PY{p}{[}\PY{n}{x}\PY{o}{.}\PY{n}{ann}\PY{p}{(}\PY{n}{b}\PY{p}{,}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mf}{0.03}\PY{p}{)} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
-        \PY{n}{ann2} \PY{o}{=}  \PY{p}{[}\PY{n}{x}\PY{o}{.}\PY{n}{ann}\PY{p}{(}\PY{n}{b}\PY{p}{,}\PY{l+m+mi}{60}\PY{p}{,}\PY{l+m+mf}{0.01}\PY{p}{)} \PY{k}{for} \PY{n}{b} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1940}\PY{p}{,}\PY{l+m+mi}{1980}\PY{p}{)}\PY{p}{]}
-        
-        \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{byrs}\PY{p}{,}\PY{n}{ann1}\PY{p}{,}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{3 pct real return}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{byrs}\PY{p}{,}\PY{n}{ann2}\PY{p}{,}\PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{1 pct real return}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{birth year}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{price of annuity}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_14_0.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_21_0.png}
     \end{center}
     { \hspace*{\fill} \\}
     

@@ -84,7 +84,7 @@ class table:
         yrstart = byear + agestart
         nyrs = agestop - agestart
         prob = 1.0
-        for i in range(1,nyrs):
+        for i in range(0,nyrs):
             if (yrstart+i<2063):
                 prob *= (1.0-self.tab.loc[str(yrstart+i),str(agestart+i)])
             else:
