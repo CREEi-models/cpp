@@ -3,7 +3,8 @@ import operator
 from enum import Enum
 import numpy as np
 import pandas as pd
-   
+from os import path
+
 class record:
     def __init__(self,year,earn=0.0,contrib=0.0,kids=False,disab=False):
         self.year = year
@@ -20,11 +21,11 @@ class rules:
 			 'survrate1', 'survrate2','era','nra','lra','test','supp','disab_rate','disab_base','cola']
         self.qpp = qpp
         self.start = 1966
-
+        params = path.join(path.dirname(__file__), 'params')
         if (self.qpp==True):     
-            self.yrspars = pd.read_excel('params/qpp_history.xlsx',names=ynames)
+            self.yrspars = pd.read_excel(params+'/qpp_history.xlsx',names=ynames)
         else :
-            self.yrspars = pd.read_excel('params/cpp_history.xlsx',names=ynames)
+            self.yrspars = pd.read_excel(params+'/cpp_history.xlsx',names=ynames)
         self.stop  = np.max(self.yrspars['year'].values)
         self.yrspars = self.yrspars.set_index('year')
         self.cpi = 0.02
