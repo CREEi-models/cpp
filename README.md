@@ -1,2 +1,2 @@
 # cpp
-Experimental stand-alone model of CPP
+CPP (and QPP) benefit computations
