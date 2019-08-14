@@ -334,6 +334,8 @@ class account:
         self.benefit = 0.0
         self.benefit_s1 = 0.0
         self.benefit_s2 = 0.0
+        self.retage = 0.0
+        self.ratio_list = []
 
     def MakeContrib(self,year,earn,kids=False):
         if year >= self.rules.start:
@@ -550,14 +552,28 @@ class account:
             self.benefit = 0.0
             self.benefit_s1 = 0.0
             self.benefit_s2 = 0.0
-    def RunCase(self,retage=60,claimage=65,ratio=1.0):
-        for a in range(18,retage):
+    def RunCase(self,claimage=65,ratio=1.0):
+        for a in range(18,self.retage):
             yr = self.gYear(a)
-            self.MakeContrib(yr,earn=self.rules.ympe(yr)*ratio)
-            self.MakeContrib_s1(yr,earn=self.rules.ympe(yr)*ratio)
-            self.MakeContrib_s2(yr,earn=self.rules.ympe_s2(yr)*ratio)
+            self.MakeContrib(yr,earn=self.rules.ympe(yr)*self.ratio_list[18-a])
+            self.MakeContrib_s1(yr,earn=self.rules.ympe(yr)*self.ratio_list[18-a])
+            self.MakeContrib_s2(yr,earn=self.rules.ympe_s2(yr)*self.ratio_list[18-a])
         self.ClaimCPP(self.gYear(claimage))
         return
+
+    def SetHistoty(self,retage=60, **kwargs):
+        self.retage = retage
+        nyears = self.retage - 18
+        self.ratio_list = [1]*nyears
+        nargs = len(kwargs)
+        niter=0
+        for key,val in kwargs.items():
+            temp_list= [x for x in val.values()]
+            for i in np.arange(niter,niter+temp_list[1]):
+                self.ratio_list[i] = temp_list[0]
+                niter += 1
+        return
+
     def ResetCase(self):
         self.claimage = None
         self.history = []
@@ -571,6 +587,3 @@ class account:
         self.benefit = 0.0
         self.benefit_s1 = 0.0
         self.benefit_s2 = 0.0
-
-
-    
