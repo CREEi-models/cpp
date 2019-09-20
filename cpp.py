@@ -461,6 +461,10 @@ class account:
         for a in range(start_age,self.retage):
             yr = self.gYear(a)
             self.MakeContrib(yr,earn=self.rules.ympe(yr)*self.ratio_list[a-start_age])
+        if self.retage < claimage :
+            for a in range(self.retage,claimage):
+                yr = self.gYear(a)
+                self.MakeContrib(yr,earn=0)
         self.ClaimCPP(self.gYear(claimage))
         return
 
