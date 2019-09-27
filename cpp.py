@@ -296,7 +296,7 @@ class account:
             contrib_s2 = self.rules.worktax_s2(year) * taxable_s2
             self.history.append(record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids))
             if self.claimage!=None:
-                self.CalcPRB(self,year,taxable)
+                self.CalcPRB(year,taxable)
             self.ncontrib +=1
         if year>self.rules.start_s1 and contrib>0.0:
             self.ncontrib_s1 +=1
@@ -306,7 +306,7 @@ class account:
     def ClaimCPP(self,year):
         currage = self.gAge(year)
         if self.claimage!=None:
-            print('already claimed at ',self.claimage,' ...')
+           print('already claimed at ',self.claimage,' ...')
         else :
             if currage >= self.rules.era(year):
                 self.claimage = currage
@@ -459,7 +459,7 @@ class account:
             self.benefit_s1 = 0.0
             self.benefit_s2 = 0.0
     def CalcPRB(self,year,taxable):
-        if self.qpp:
+        if self.rules.qpp==True:
             if year>=2014:
                 self.prb += taxable*0.5
             else: 
@@ -469,7 +469,7 @@ class account:
         start_age = self.gAge(yr18)
         for a in range(start_age,self.retage):
             yr = self.gYear(a)
-            self.MakeContrib(yr,earn=self.rules.ympe(yr)*self.ratio_list[a-start_age])
+            self.MakeContrib(yr,earn=self.rules.ympe(yr)*self.ratio_list[a-start_age], kids = self.kids_list[a-start_age])
         if self.retage < claimage :
             for a in range(self.retage,claimage):
                 yr = self.gYear(a)
@@ -477,7 +477,7 @@ class account:
         self.ClaimCPP(self.gYear(claimage))
         return
 
-    def SetHistory(self,retage=60, **kwargs):
+    def SetHistory_ratio(self,retage=60, **kwargs):
         self.retage = retage
         yr18 = np.max([self.gYear(18),self.rules.start])
         start_age = self.gAge(yr18)
@@ -491,6 +491,29 @@ class account:
                 self.ratio_list[i] = temp_list[0]
                 niter += 1
         return
+    
+    def SetHistory_fam(self, retage = 60, claimage = 65, age_birth=[]):
+        self.retage = retage
+        self.claimage = claimage
+        self.age_birth = age_birth       
+        yr18 = np.max([self.gYear(18),self.rules.start])
+        start_age = self.gAge(yr18)
+        print(self.rules.start,start_age, self.gYear(18))
+        end_age = np.max([self.retage,self.claimage])
+        nyears = end_age - start_age
+        self.kids_list = [False]*nyears
+        for x in range(len(age_birth)):
+            indice = age_birth[x] - start_age
+            if age_birth[x]>=start_age and age_birth[x]<= 50:
+                for yr in range(7):
+                    self.kids_list[indice+yr] = True
+            if age_birth[x]>=start_age and age_birth[x]>50:
+                print("Please check age at birth")
+            else :
+                years_deduc = 7 - (start_age - age_birth[x])
+                for yr in range(years_deduc):
+                    self.kids_list[yr] = True
+
 
     def ResetCase(self):
         self.claimage = None
