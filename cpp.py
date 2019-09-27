@@ -483,13 +483,15 @@ class account:
         yr18 = np.max([self.gYear(18),self.rules.start])
         start_age = self.gAge(yr18)
         for a in range(start_age,self.retage):
+            if a == claimage:
+                self.ClaimCPP(self.gYear(claimage))
             yr = self.gYear(a)
             self.MakeContrib(yr,earn=self.rules.ympe(yr)*self.ratio_list[a-start_age])
         if self.retage < claimage :
             for a in range(self.retage,claimage):
                 yr = self.gYear(a)
                 self.MakeContrib(yr,earn=0)
-        self.ClaimCPP(self.gYear(claimage))
+        if self.claimage==None: self.ClaimCPP(self.gYear(claimage))
         return
 
     def SetHistory(self,retage=60, **kwargs):
