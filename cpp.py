@@ -296,7 +296,7 @@ class account:
             contrib_s2 = self.rules.worktax_s2(year) * taxable_s2
             self.history.append(record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids))
             if self.claimage!=None:
-                self.CalcPRB(self,year,taxable)
+                self.CalcPRB(year,taxable)
             self.ncontrib +=1
         if year>self.rules.start_s1 and contrib>0.0:
             self.ncontrib_s1 +=1
@@ -459,11 +459,26 @@ class account:
             self.benefit_s1 = 0.0
             self.benefit_s2 = 0.0
     def CalcPRB(self,year,taxable):
-        if self.qpp:
+        if self.rules.qpp:
             if year>=2014:
                 self.prb += taxable*0.5
             else: 
                 self.prb = self.prb
+        else:
+            if year>=2013 & self.gAge(year)<70:
+                nra = self.rules.nra(year)
+                arf = self.rules.arf(year)
+                drc = self.rules.drc(year)
+                age = self.gAge(year)
+
+                ratiocontrib = (taxable+self.rules.exempt(year))/(self.rules.ympe(year))
+                prb = ratiocontrib*self.rules.survmax65(year)*0.025
+                
+                if (age<nra):
+                    self.prb = self.prb + (1.0+arf*(age-nra)) * prb
+                else :
+                    self.prb = self.prb + (1.0+drc*(age-nra)) * prb
+            else : self.prb = self.prb
     def RunCase(self,claimage=65):
         yr18 = np.max([self.gYear(18),self.rules.start])
         start_age = self.gAge(yr18)
