@@ -298,11 +298,6 @@ class account:
             self.history[index]= record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids)
             if self.claimage!=None:
                 self.CalcPRB(year,taxable)
-            self.ncontrib +=1
-        if year>self.rules.start_s1 and contrib>0.0:
-            self.ncontrib_s1 +=1
-        if contrib_s2>0:
-            self.ncontrib_s2 +=1
 
     def ClaimCPP(self,year):
         currage = self.gAge(year)
@@ -310,6 +305,9 @@ class account:
             print('already claimed at ',self.claimage,' ...')
         else :
             if currage >= self.rules.era(year):
+                self.ncontrib = min(currage - 18 + 1,year-1966+1)
+                self.ncontrib_s1 = min(currage - 18+1,year-self.rules.start_s1+1)
+                self.ncontrib_s2 = min(currage - 18+1,self.rules.start_s2+1)
                 self.claimage = currage
                 self.receiving = True
                 self.CalcAMPE(year)
