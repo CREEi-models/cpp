@@ -266,10 +266,10 @@ class rules:
                 self.byrpars.loc[i,name] = value
 
 class account:
-    def __init__(self,byear=None,rules=None):
+    def __init__(self,byear,rules=None):
         self.byear = byear
         self.claimage = None
-        self.history = []
+        self.history = [record(yr) for yr in range(self.byear+18,self.byear+70,1)]
         self.ncontrib = 0
         self.ncontrib_s1 = 0
         self.ncontrib_s2 = 0
@@ -294,7 +294,8 @@ class account:
 
             taxable_s2 = np.min([np.max([earn-self.rules.ympe(year),0.0]),(self.rules.ympe_s2(year)-1)*self.rules.ympe(year)])
             contrib_s2 = self.rules.worktax_s2(year) * taxable_s2
-            self.history.append(record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids))
+            index = gAge(year)-18
+            self.history[index]= record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids)
             if self.claimage!=None:
                 self.CalcPRB(year,taxable)
             self.ncontrib +=1
