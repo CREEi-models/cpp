@@ -337,36 +337,36 @@ class account:
         earn = [self.history[p].earn for p in range(self.ncontrib)]
         nympe = self.rules.nympe(year)
         # unadjusted pensionable earnings
-        upe = [np.min([earn[i],ympe[i]]) for i in range(self.ncontrib)]
-        upe = [np.where(upe[i]<exempt[i],0.0,upe[i]) for i in range(self.ncontrib)]
+        self.upe = [np.min([earn[i],ympe[i]]) for i in range(self.ncontrib)]
+        self.upe = [np.where(self.upe[i]<exempt[i],0.0,self.upe[i]) for i in range(self.ncontrib)]
         #upe_s2 Need to start only in 2024
-        upe_s2 = [np.max([np.min([earn[i]-ympe[i],ympe_s2[i]-ympe[i]]),0.0]) for i in range(self.ncontrib)]
+        self.upe_s2 = [np.max([np.min([earn[i]-ympe[i],ympe_s2[i]-ympe[i]]),0.0]) for i in range(self.ncontrib)]
 
         # average ympe last 5 years
         avgympe = np.mean([self.rules.ympe(i) for i in range(year-nympe+1,year+1)])
         # compute ape
-        ape = [upe[i]/ympe[i]*avgympe for i in range(self.ncontrib)]
-        ape_s1 = [upe[i]/ympe[i] * avgympe * worktax_s1[i]*100 for i in range(self.ncontrib)]
-        ape_s2 = [upe_s2[i]/ympe[i]*avgympe for i in range(self.ncontrib)]
+        ape = [self.upe[i]/ympe[i]*avgympe for i in range(self.ncontrib)]
+        ape_s1 = [self.upe[i]/ympe[i] * avgympe * worktax_s1[i]*100 for i in range(self.ncontrib)]
+        ape_s2 = [self.upe_s2[i]/ympe[i]*avgympe for i in range(self.ncontrib)]
         # need provision for disability
         ndrop = 0
         dropped = np.full(self.ncontrib, False)
         for i in range(self.ncontrib):
-            if (upe[i]==0.0 and disab[i]==True):
+            if (self.upe[i]==0.0 and disab[i]==True):
                 dropped[i] = True
                 ndrop +=1
 
         ndrop_s1 = 0
         dropped_s1 = np.full(self.ncontrib, False)
         for i in range(self.ncontrib):
-            if year>=self.rules.start_s1 and (upe[i]==0.0 and disab[i]==True):
+            if year>=self.rules.start_s1 and (self.upe[i]==0.0 and disab[i]==True):
                 dropped_s1[i] = True
                 ndrop_s1 +=1
 
         ndrop_s2 = 0
         dropped_s2 = np.full(self.ncontrib, False)
         for i in range(self.ncontrib):
-            if year>=self.rules.start_s2 and (upe_s2[i]==0.0 and disab[i]==True):
+            if year>=self.rules.start_s2 and (self.upe_s2[i]==0.0 and disab[i]==True):
                 dropped_s2[i] = True
                 ndrop_s2 +=1
 
@@ -375,7 +375,7 @@ class account:
         ndrop = 0
         dropped = np.full(self.ncontrib, False)
         for i in range(self.ncontrib):
-            if (upe[i]==0.0 and kids[i]==True):
+            if (self.upe[i]==0.0 and kids[i]==True):
                 dropped[i] = True
                 ndrop +=1
         # compute average ape
