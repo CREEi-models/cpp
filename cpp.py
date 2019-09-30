@@ -294,7 +294,7 @@ class account:
 
             taxable_s2 = np.min([np.max([earn-self.rules.ympe(year),0.0]),(self.rules.ympe_s2(year)-1)*self.rules.ympe(year)])
             contrib_s2 = self.rules.worktax_s2(year) * taxable_s2
-            index = gAge(year)-18
+            index = self.gAge(year)-18
             self.history[index]= record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids)
             if self.claimage!=None:
                 self.CalcPRB(year,taxable)
