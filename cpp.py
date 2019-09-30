@@ -492,15 +492,11 @@ class account:
                 niter += 1
         return
     
-    def SetHistory_fam(self, retage = 60, claimage = 65, age_birth=[]):
-        self.retage = retage
-        self.claimage = claimage
+    def SetHistory_fam(self, claimage = 65, age_birth=[]):
         self.age_birth = age_birth       
         yr18 = np.max([self.gYear(18),self.rules.start])
         start_age = self.gAge(yr18)
-        print(self.rules.start,start_age, self.gYear(18))
-        end_age = np.max([self.retage,self.claimage])
-        nyears = end_age - start_age
+        nyears = claimage - start_age
         self.kids_list = [False]*nyears
         for x in range(len(age_birth)):
             indice = age_birth[x] - start_age
