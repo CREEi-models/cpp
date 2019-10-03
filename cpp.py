@@ -325,16 +325,17 @@ class account:
         yr70 = np.min([self.gYear(70),year])
         nyrs = yr70-yr18
         yr18_s2 = np.max([self.gYear(18),self.rules.start_s2])
-        nyrs_s2 = [np.max((yr70-yr18_s2),0)]
-        yrs = [self.history[p].year for p in range(self.ncontrib)]
-        yrs_s2 = [self.history[p].year for p in range(self.ncontrib_s2)]
+        nyrs_s2 = [np.max([(yr70-yr18_s2),0])]
+        index = np.max([self.gAge(1966)-18,0])
+        yrs = [self.history[p].year for p in range(index,index+self.ncontrib)]
+        yrs_s2 = [self.history[p].year for p in range(index,index+self.ncontrib_s2)]
         ympe = [self.rules.ympe(i) for i in yrs]
         ympe_s2 = [self.rules.ympe_s2(i) for i in yrs]
         worktax_s1 = [self.rules.worktax_s1(i) for i in yrs]
         exempt = [self.rules.exempt(i) for i in yrs]
-        kids = [self.history[p].kids for p in range(self.ncontrib)]
-        disab = [self.history[p].disab for p in range(self.ncontrib)]
-        earn = [self.history[p].earn for p in range(self.ncontrib)]
+        kids = [self.history[p].kids for p in range(index,index+self.ncontrib)]
+        disab = [self.history[p].disab for p in range(index,index+self.ncontrib)]
+        earn = [self.history[p].earn for p in range(index,index+self.ncontrib)]
         nympe = self.rules.nympe(year)
         # unadjusted pensionable earnings
         self.upe = [np.min([earn[i],ympe[i]]) for i in range(self.ncontrib)]
@@ -510,7 +511,7 @@ class account:
 
     def ResetCase(self):
         self.claimage = None
-        self.history = []
+        self.history = [record(yr) for yr in range(self.byear+18,self.byear+70,1)]
         self.ncontrib = 0
         self.ampe = 0.0
         self.receiving = False
