@@ -266,10 +266,10 @@ class rules:
                 self.byrpars.loc[i,name] = value
 
 class account:
-    def __init__(self,byear=None,rules=None):
+    def __init__(self,byear,rules=None):
         self.byear = byear
         self.claimage = None
-        self.history = []
+        self.history = [record(yr) for yr in range(self.byear+18,self.byear+70,1)]
         self.ncontrib = 0
         self.ncontrib_s1 = 0
         self.ncontrib_s2 = 0
@@ -281,7 +281,8 @@ class account:
         self.benefit = 0.0
         self.benefit_s1 = 0.0
         self.benefit_s2 = 0.0
-        self.prb = 0.0
+        self.prb = [0 for x in range(10)]
+
     def MakeContrib(self,year,earn,kids=False):
         if year>=self.rules.start:
             taxable = np.min([earn,self.rules.ympe(year)])
@@ -294,21 +295,20 @@ class account:
 
             taxable_s2 = np.min([np.max([earn-self.rules.ympe(year),0.0]),(self.rules.ympe_s2(year)-1)*self.rules.ympe(year)])
             contrib_s2 = self.rules.worktax_s2(year) * taxable_s2
-            self.history.append(record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids))
+            index = self.gAge(year)-18
+            self.history[index]= record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids)
             if self.claimage!=None:
-                self.CalcPRB(year,taxable)
-            self.ncontrib +=1
-        if year>self.rules.start_s1 and contrib>0.0:
-            self.ncontrib_s1 +=1
-        if contrib_s2>0:
-            self.ncontrib_s2 +=1
-
+                self.CalcPRB(year,taxable,taxable_s2,earn)
+            
     def ClaimCPP(self,year):
         currage = self.gAge(year)
         if self.claimage!=None:
            print('already claimed at ',self.claimage,' ...')
         else :
             if currage >= self.rules.era(year):
+                self.ncontrib = np.min([currage - 18,year-1966])
+                self.ncontrib_s1 = np.max([np.min([currage - 18,year-self.rules.start_s1]),0])
+                self.ncontrib_s2 = np.max([np.min([currage - 18,year-self.rules.start_s2]),0])
                 self.claimage = currage
                 self.receiving = True
                 self.CalcAMPE(year)
@@ -326,48 +326,49 @@ class account:
         yr70 = np.min([self.gYear(70),year])
         nyrs = yr70-yr18
         yr18_s2 = np.max([self.gYear(18),self.rules.start_s2])
-        nyrs_s2 = [np.max((yr70-yr18_s2),0)]
-        yrs = [self.history[p].year for p in range(self.ncontrib)]
-        yrs_s2 = [self.history[p].year for p in range(self.ncontrib_s2)]
+        nyrs_s2 = [np.max([(yr70-yr18_s2),0])]
+        index = np.max([self.gAge(1966)-18,0])
+        yrs = [self.history[p].year for p in range(index,index+self.ncontrib)]
+        yrs_s2 = [self.history[p].year for p in range(index,index+self.ncontrib_s2)]
         ympe = [self.rules.ympe(i) for i in yrs]
         ympe_s2 = [self.rules.ympe_s2(i) for i in yrs]
         worktax_s1 = [self.rules.worktax_s1(i) for i in yrs]
         exempt = [self.rules.exempt(i) for i in yrs]
-        kids = [self.history[p].kids for p in range(self.ncontrib)]
-        disab = [self.history[p].disab for p in range(self.ncontrib)]
-        earn = [self.history[p].earn for p in range(self.ncontrib)]
+        kids = [self.history[p].kids for p in range(index,index+self.ncontrib)]
+        disab = [self.history[p].disab for p in range(index,index+self.ncontrib)]
+        earn = [self.history[p].earn for p in range(index,index+self.ncontrib)]
         nympe = self.rules.nympe(year)
         # unadjusted pensionable earnings
-        upe = [np.min([earn[i],ympe[i]]) for i in range(self.ncontrib)]
-        upe = [np.where(upe[i]<exempt[i],0.0,upe[i]) for i in range(self.ncontrib)]
+        self.upe = [np.min([earn[i],ympe[i]]) for i in range(self.ncontrib)]
+        self.upe = [np.where(self.upe[i]<exempt[i],0.0,self.upe[i]) for i in range(self.ncontrib)]
         #upe_s2 Need to start only in 2024
-        upe_s2 = [np.max([np.min([earn[i]-ympe[i],ympe_s2[i]-ympe[i]]),0.0]) for i in range(self.ncontrib)]
+        self.upe_s2 = [np.max([np.min([earn[i]-ympe[i],ympe_s2[i]-ympe[i]]),0.0]) for i in range(self.ncontrib)]
 
         # average ympe last 5 years
         avgympe = np.mean([self.rules.ympe(i) for i in range(year-nympe+1,year+1)])
         # compute ape
-        ape = [upe[i]/ympe[i]*avgympe for i in range(self.ncontrib)]
-        ape_s1 = [upe[i]/ympe[i] * avgympe * worktax_s1[i]*100 for i in range(self.ncontrib)]
-        ape_s2 = [upe_s2[i]/ympe[i]*avgympe for i in range(self.ncontrib)]
+        ape = [self.upe[i]/ympe[i]*avgympe for i in range(self.ncontrib)]
+        ape_s1 = [self.upe[i]/ympe[i] * avgympe * worktax_s1[i]*100 for i in range(self.ncontrib)]
+        ape_s2 = [self.upe_s2[i]/ympe[i]*avgympe for i in range(self.ncontrib)]
         # need provision for disability
         ndrop = 0
         dropped = np.full(self.ncontrib, False)
         for i in range(self.ncontrib):
-            if (upe[i]==0.0 and disab[i]==True):
+            if (self.upe[i]==0.0 and disab[i]==True):
                 dropped[i] = True
                 ndrop +=1
 
         ndrop_s1 = 0
         dropped_s1 = np.full(self.ncontrib, False)
         for i in range(self.ncontrib):
-            if year>=self.rules.start_s1 and (upe[i]==0.0 and disab[i]==True):
+            if year>=self.rules.start_s1 and (self.upe[i]==0.0 and disab[i]==True):
                 dropped_s1[i] = True
                 ndrop_s1 +=1
 
         ndrop_s2 = 0
         dropped_s2 = np.full(self.ncontrib, False)
         for i in range(self.ncontrib):
-            if year>=self.rules.start_s2 and (upe_s2[i]==0.0 and disab[i]==True):
+            if year>=self.rules.start_s2 and (self.upe_s2[i]==0.0 and disab[i]==True):
                 dropped_s2[i] = True
                 ndrop_s2 +=1
 
@@ -376,7 +377,7 @@ class account:
         ndrop = 0
         dropped = np.full(self.ncontrib, False)
         for i in range(self.ncontrib):
-            if (upe[i]==0.0 and kids[i]==True):
+            if (self.upe[i]==0.0 and kids[i]==True):
                 dropped[i] = True
                 ndrop +=1
         # compute average ape
@@ -458,23 +459,43 @@ class account:
             self.benefit = 0.0
             self.benefit_s1 = 0.0
             self.benefit_s2 = 0.0
-    def CalcPRB(self,year,taxable):
-        if self.rules.qpp==True:
+    def CalcPRB(self,year,taxable,taxable_s2,earn):
+        if self.rules.qpp:
             if year>=2014:
-                self.prb += taxable*0.5
-            else: 
-                self.prb = self.prb
+                prb = self.prb[self.gAge(year)-60]+taxable*(0.005+self.rules.worktax_s1(year)*100*0.0016)
+                self.prb[self.gAge(year)-60+1] = prb + taxable_s2*0.0066
+        else:
+            if year>=2013 & self.gAge(year)<70:
+                nra = self.rules.nra(year)
+                arf = self.rules.arf(year)
+                drc = self.rules.drc(year)
+                age = self.gAge(year)
+                upe = np.min([earn,self.rules.ympe(year)]) 
+                if upe<self.rules.exempt(year) : upe = 0
+                #upe_s2 Need to start only in 2024
+                upe_s2 = np.max([np.min([earn-self.rules.ympe(year),self.rules.ympe_s2(year)-self.rules.ympe(year)]),0.0])
+                #PRB base + PRB S1
+                prb = upe/self.rules.ympe(year) * self.rules.ympe(year+1)*(0.00625+self.rules.worktax_s1(year)*100*0.00208)
+                #PRB S2
+                prb = prb + upe_s2/(self.rules.ympe_s2(year)-self.rules.ympe(year))*(self.rules.ympe_s2(year+1)-self.rules.ympe(year+1)) * 0.00833
+                #Ajustment factor
+                if (age<nra):
+                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60] + (1.0+arf*(age-nra)) * prb
+                else :
+                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60] + (1.0+drc*(age-nra)) * prb
     def RunCase(self,claimage=65):
         yr18 = np.max([self.gYear(18),self.rules.start])
         start_age = self.gAge(yr18)
         for a in range(start_age,self.retage):
+            if a == claimage:
+                self.ClaimCPP(self.gYear(claimage))
             yr = self.gYear(a)
             self.MakeContrib(yr,earn=self.rules.ympe(yr)*self.ratio_list[a-start_age], kids = self.kids_list[a-start_age])
         if self.retage < claimage :
             for a in range(self.retage,claimage):
                 yr = self.gYear(a)
                 self.MakeContrib(yr,earn=0)
-        self.ClaimCPP(self.gYear(claimage))
+        if self.claimage==None: self.ClaimCPP(self.gYear(claimage))
         return
 
     def SetHistory_ratio(self,retage=60, **kwargs):
@@ -513,7 +534,7 @@ class account:
 
     def ResetCase(self):
         self.claimage = None
-        self.history = []
+        self.history = [record(yr) for yr in range(self.byear+18,self.byear+70,1)]
         self.ncontrib = 0
         self.ampe = 0.0
         self.receiving = False

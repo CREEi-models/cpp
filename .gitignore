@@ -1,5 +1,4 @@
 *checkpoint.ipynb
 *.pyc
-*.pyc
 __pycache__/cpp.cpython-36.pyc
 .ipynb_checkpoints/cpp-checkpoint.py
