@@ -298,7 +298,7 @@ class account:
             index = self.gAge(year)-18
             self.history[index]= record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids)
             if self.claimage!=None:
-                self.CalcPRB(year,taxable,earn)
+                self.CalcPRB(year,taxable,taxable_s2,earn)
 
     def ClaimCPP(self,year):
         currage = self.gAge(year)
@@ -459,22 +459,26 @@ class account:
             self.benefit = 0.0
             self.benefit_s1 = 0.0
             self.benefit_s2 = 0.0
-    def CalcPRB(self,year,taxable,earn):
+    def CalcPRB(self,year,taxable,taxable_s2,earn):
         if self.rules.qpp:
             if year>=2014:
-                self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60]+taxable*0.005
+                prb = self.prb[self.gAge(year)-60]+taxable*(0.005+self.rules.worktax_s1(year)*100*0.0016)
+                self.prb[self.gAge(year)-60+1] = prb + taxable_s2*0.0066
             else: 
             if year>=2013 & self.gAge(year)<70:
                 nra = self.rules.nra(year)
                 arf = self.rules.arf(year)
                 drc = self.rules.drc(year)
                 age = self.gAge(year)
-                upe = np.min(earn,self.rules.ympe(year)) 
+                upe = np.min([earn,self.rules.ympe(year)]) 
                 if upe<self.rules.exempt(year) : upe = 0
                 #upe_s2 Need to start only in 2024
-                upe_s2 = np.max(np.min(earn-self.rules.ympe[year],self.rules.ympe_s2[year]-self.rules.ympe[year]),0.0) 
-                prb = upe/self.rules.ympe(year) * self.rules.ympe(year+1)*0.00625
-                ##AJOUTER pour s1 et s2
+                upe_s2 = np.max([np.min([earn-self.rules.ympe(year),self.rules.ympe_s2(year)-self.rules.ympe(year)]),0.0])
+                #PRB base + PRB S1
+                prb = upe/self.rules.ympe(year) * self.rules.ympe(year+1)*(0.00625+self.rules.worktax_s1(year)*100*0.00208)
+                #PRB S2
+                prb = prb + upe_s2/(self.rules.ympe_s2(year)-self.rules.ympe(year))*(self.rules.ympe_s2(year+1)-self.rules.ympe(year+1)) * 0.00833
+                #Ajustment factor
                 if (age<nra):
                     self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60] + (1.0+arf*(age-nra)) * prb
                 else :
