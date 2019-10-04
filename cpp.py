@@ -299,7 +299,7 @@ class account:
             self.history[index]= record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids)
             if self.claimage!=None:
                 self.CalcPRB(year,taxable,taxable_s2,earn)
-
+            
     def ClaimCPP(self,year):
         currage = self.gAge(year)
         if self.claimage!=None:
@@ -464,7 +464,7 @@ class account:
             if year>=2014:
                 prb = self.prb[self.gAge(year)-60]+taxable*(0.005+self.rules.worktax_s1(year)*100*0.0016)
                 self.prb[self.gAge(year)-60+1] = prb + taxable_s2*0.0066
-            else: 
+        else:
             if year>=2013 & self.gAge(year)<70:
                 nra = self.rules.nra(year)
                 arf = self.rules.arf(year)
