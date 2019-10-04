@@ -281,7 +281,8 @@ class account:
         self.benefit = 0.0
         self.benefit_s1 = 0.0
         self.benefit_s2 = 0.0
-        self.prb = 0.0
+        self.prb = [0 for x in range(10)]
+
     def MakeContrib(self,year,earn,kids=False):
         if year>=self.rules.start:
             taxable = np.min([earn,self.rules.ympe(year)])
@@ -297,7 +298,7 @@ class account:
             index = self.gAge(year)-18
             self.history[index]= record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids)
             if self.claimage!=None:
-                self.CalcPRB(year,taxable)
+                self.CalcPRB(year,taxable,earn)
 
     def ClaimCPP(self,year):
         currage = self.gAge(year)
@@ -305,9 +306,9 @@ class account:
             print('already claimed at ',self.claimage,' ...')
         else :
             if currage >= self.rules.era(year):
-                self.ncontrib = min(currage - 18 + 1,year-1966+1)
-                self.ncontrib_s1 = min(currage - 18+1,year-self.rules.start_s1+1)
-                self.ncontrib_s2 = min(currage - 18+1,self.rules.start_s2+1)
+                self.ncontrib = np.min([currage - 18,year-1966])
+                self.ncontrib_s1 = np.max([np.min([currage - 18,year-self.rules.start_s1]),0])
+                self.ncontrib_s2 = np.max([np.min([currage - 18,year-self.rules.start_s2]),0])
                 self.claimage = currage
                 self.receiving = True
                 self.CalcAMPE(year)
@@ -458,27 +459,26 @@ class account:
             self.benefit = 0.0
             self.benefit_s1 = 0.0
             self.benefit_s2 = 0.0
-    def CalcPRB(self,year,taxable):
+    def CalcPRB(self,year,taxable,earn):
         if self.rules.qpp:
             if year>=2014:
-                self.prb += taxable*0.5
+                self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60]+taxable*0.005
             else: 
-                self.prb = self.prb
-        else:
             if year>=2013 & self.gAge(year)<70:
                 nra = self.rules.nra(year)
                 arf = self.rules.arf(year)
                 drc = self.rules.drc(year)
                 age = self.gAge(year)
-
-                ratiocontrib = (taxable+self.rules.exempt(year))/(self.rules.ympe(year))
-                prb = ratiocontrib*self.rules.survmax65(year)*0.025
-                
+                upe = np.min(earn,self.rules.ympe(year)) 
+                if upe<self.rules.exempt(year) : upe = 0
+                #upe_s2 Need to start only in 2024
+                upe_s2 = np.max(np.min(earn-self.rules.ympe[year],self.rules.ympe_s2[year]-self.rules.ympe[year]),0.0) 
+                prb = upe/self.rules.ympe(year) * self.rules.ympe(year+1)*0.00625
+                ##AJOUTER pour s1 et s2
                 if (age<nra):
-                    self.prb = self.prb + (1.0+arf*(age-nra)) * prb
+                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60] + (1.0+arf*(age-nra)) * prb
                 else :
-                    self.prb = self.prb + (1.0+drc*(age-nra)) * prb
-            else : self.prb = self.prb
+                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60] + (1.0+drc*(age-nra)) * prb
     def RunCase(self,claimage=65):
         yr18 = np.max([self.gYear(18),self.rules.start])
         start_age = self.gAge(yr18)
