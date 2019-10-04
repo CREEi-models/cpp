@@ -303,7 +303,7 @@ class account:
     def ClaimCPP(self,year):
         currage = self.gAge(year)
         if self.claimage!=None:
-            print('already claimed at ',self.claimage,' ...')
+           print('already claimed at ',self.claimage,' ...')
         else :
             if currage >= self.rules.era(year):
                 self.ncontrib = np.min([currage - 18,year-1966])
@@ -490,7 +490,7 @@ class account:
             if a == claimage:
                 self.ClaimCPP(self.gYear(claimage))
             yr = self.gYear(a)
-            self.MakeContrib(yr,earn=self.rules.ympe(yr)*self.ratio_list[a-start_age])
+            self.MakeContrib(yr,earn=self.rules.ympe(yr)*self.ratio_list[a-start_age], kids = self.kids_list[a-start_age])
         if self.retage < claimage :
             for a in range(self.retage,claimage):
                 yr = self.gYear(a)
@@ -498,7 +498,7 @@ class account:
         if self.claimage==None: self.ClaimCPP(self.gYear(claimage))
         return
 
-    def SetHistory(self,retage=60, **kwargs):
+    def SetHistory_ratio(self,retage=60, **kwargs):
         self.retage = retage
         yr18 = np.max([self.gYear(18),self.rules.start])
         start_age = self.gAge(yr18)
@@ -512,6 +512,25 @@ class account:
                 self.ratio_list[i] = temp_list[0]
                 niter += 1
         return
+    
+    def SetHistory_fam(self, claimage = 65, age_birth=[]):
+        self.age_birth = age_birth       
+        yr18 = np.max([self.gYear(18),self.rules.start])
+        start_age = self.gAge(yr18)
+        nyears = claimage - start_age
+        self.kids_list = [False]*nyears
+        for x in range(len(age_birth)):
+            indice = age_birth[x] - start_age
+            if age_birth[x]>=start_age and age_birth[x]<= 50:
+                for yr in range(7):
+                    self.kids_list[indice+yr] = True
+            if age_birth[x]>=start_age and age_birth[x]>50:
+                print("Please check age at birth")
+            else :
+                years_deduc = 7 - (start_age - age_birth[x])
+                for yr in range(years_deduc):
+                    self.kids_list[yr] = True
+
 
     def ResetCase(self):
         self.claimage = None
