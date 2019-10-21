@@ -281,7 +281,7 @@ class account:
         self.benefit = 0.0
         self.benefit_s1 = 0.0
         self.benefit_s2 = 0.0
-        self.prb = [0 for x in range(10)]
+        self.prb = [0 for x in range(11)]
 
     def MakeContrib(self,year,earn,kids=False):
         if year>=self.rules.start:
