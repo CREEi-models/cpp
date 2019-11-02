@@ -62,11 +62,11 @@ class rules:
         self.wgr = 0.03
         self.stop = 2024 #self.yrspars['years'][self.yrspars['years'].argmax()]
     def loc(self,year):
-        for i in range(len(self.yrspars['year'])):
-            if self.yrspars['year'][i]==year:
-               return i
-        return -1
-        #return year-self.yrspars['year'][0]
+        #for i in range(len(self.yrspars['year'])):
+        #    if self.yrspars['year'][i]==year:
+        #       return i
+        #return -1
+        return year-self.yrspars['year'][0]
         #return np.where(self.yrspars['year']==year,self.yrspars['year'],0).argmax()
         #return self.yrspars[var][index]
     def ympe(self,year):
