@@ -469,7 +469,7 @@ class account:
     def CalcPRB(self,year,taxable,taxable_s2,earn):
         if self.rules.qpp:
             if year>=2014:
-                prb = self.prb[self.gAge(year)-60]+taxable*(0.005+self.rules.worktax_s1(year)*100*0.0016)
+                prb = self.prb[self.gAge(year)-60]*(1+self.rules.cola(year))+taxable*(0.005+self.rules.worktax_s1(year)*100*0.0016)
                 self.prb[self.gAge(year)-60+1] = prb + taxable_s2*0.0066
         else:
             if year>=2013 & self.gAge(year)<70:
@@ -485,12 +485,12 @@ class account:
                 prb = upe/self.rules.ympe(year) * self.rules.ympe(year+1)*(0.00625+self.rules.worktax_s1(year)*100*0.00208)
                 #PRB S2
                 if upe_s2>0:
-                prb = prb + upe_s2/(self.rules.ympe_s2(year)-self.rules.ympe(year))*(self.rules.ympe_s2(year+1)-self.rules.ympe(year+1)) * 0.00833
+                    prb = prb + upe_s2/(self.rules.ympe_s2(year)-self.rules.ympe(year))*(self.rules.ympe_s2(year+1)-self.rules.ympe(year+1)) * 0.00833
                 #Ajustment factor
                 if (age<nra):
-                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60] + (1.0+arf*(age-nra)) * prb
+                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+arf*(age-nra)) * prb
                 else :
-                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60] + (1.0+drc*(age-nra)) * prb
+                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+drc*(age-nra)) * prb
     def gBenefit(self,year):
         if self.claimage :
             claimyear = self.gYear(self.claimage)
@@ -509,6 +509,15 @@ class account:
             return self.benefit_s2 * self.rules.gIndexation(claimyear,year)
         else :
             return self.benefit_s2
+    def gPRB(self,year):
+        if self.gAge(year)<60 : 
+            return 0.0
+        elif  self.gAge(year)<self.gAge(year)<=70:
+            return self.prb[self.gAge(year)-60]
+        else :
+            return self.prb[10]*self.rules.gIndexation(self.gYear(70),year)
+        
+        
     def RunCase(self,claimage=65):
         yr18 = np.max([self.gYear(18),self.rules.start])
         start_age = self.gAge(yr18)
