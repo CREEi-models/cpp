@@ -1,0 +1,14 @@
+name: cpp-numba
+channels:
+  - defaults
+dependencies:
+  - pandas
+  - numpy
+  - numba=0.45
+  - python=3.7
+  - xlrd
+  - pytest
+  - pytest-cov
+  - pylint
+#prefix: /Users/UQAM/anaconda3/envs/cpp-numba
+
