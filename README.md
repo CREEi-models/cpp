@@ -1,2 +1,2 @@
-# cpp
-CPP (and QPP) benefit computations
+# cpp package
+CPP and QPP benefit computations
