@@ -484,6 +484,7 @@ class account:
                 #PRB base + PRB S1
                 prb = upe/self.rules.ympe(year) * self.rules.ympe(year+1)*(0.00625+self.rules.worktax_s1(year)*100*0.00208)
                 #PRB S2
+                if upe_s2>0:
                 prb = prb + upe_s2/(self.rules.ympe_s2(year)-self.rules.ympe(year))*(self.rules.ympe_s2(year+1)-self.rules.ympe(year+1)) * 0.00833
                 #Ajustment factor
                 if (age<nra):
