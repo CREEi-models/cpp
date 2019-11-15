@@ -35,6 +35,11 @@ class rules:
         self.yrspars = self.yrspars.set_index('year')
         self.cpi = 0.02
         self.wgr = 0.03
+        self.indexation = np.ones((2100-1966,2100-1966))
+        ones_lower = np.tril(self.indexation)
+        for y in range(2100-1966):
+            self.indexation[:,y] =  self.indexation[:,y] + self.cola(1966+y)
+        self.indexation = np.cumprod((np.triu(self.indexation)-np.diag(np.diag(self.indexation))+ones_lower), axis=1)
     def ympe(self,year):
         if (year>self.stop):
             value = self.yrspars.loc[self.stop,'ympe']
@@ -253,10 +258,12 @@ class rules:
         return self.yrspars.loc[yr,'disab_base']
     def cola(self,year):
         if year > self.stop :
-            yr = self.stop
+            value  = self.cpi
         else:
-            yr = year
-        return self.yrspars.loc[yr,'cola']
+            value = self.yrspars.loc[year,'cola']
+        return value
+    def gIndexation(self,start,stop):
+        return self.indexation[start-self.start][stop-self.start]
     def chgpar(self,name,y0,y1,value):
         if (name in self.yrspars.columns):
             for i in range(y0,y1+1):
@@ -454,7 +461,7 @@ class account:
                 else :
                     self.benefit *= 1.0+drc*(age-nra)
                     self.benefit_s1 *= 1.0+drc*(age-nra)
-                    self.benefit_s2 *= 1.0+drc*(age-nra)
+                    self.benefit_s2 *= 1.0+drc*(age-nra)              
         else:
             self.benefit = 0.0
             self.benefit_s1 = 0.0
@@ -483,6 +490,24 @@ class account:
                     self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60] + (1.0+arf*(age-nra)) * prb
                 else :
                     self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60] + (1.0+drc*(age-nra)) * prb
+    def gBenefit(self,year):
+        if self.claimage :
+            claimyear = self.gYear(self.claimage)
+            return self.benefit * self.rules.gIndexation(claimyear,year)
+        else :
+            return self.benefit
+    def gBenefit_s1(self,year):
+        if self.claimage :
+            claimyear = self.gYear(self.claimage)
+            return self.benefit_s1 * self.rules.gIndexation(claimyear,year)
+        else :
+            return self.benefit_s1
+    def gBenefit_s2(self,year):
+        if self.claimage :
+            claimyear = self.gYear(self.claimage)
+            return self.benefit_s2 * self.rules.gIndexation(claimyear,year)
+        else :
+            return self.benefit_s2
     def RunCase(self,claimage=65):
         yr18 = np.max([self.gYear(18),self.rules.start])
         start_age = self.gAge(yr18)
