@@ -17,7 +17,7 @@ class record:
 class rules:
     def __init__(self,qpp=False):
         bnames = ['byear','era','nra','lra']
-        ynames = ['year','ympe','exempt','worker','employer','selfemp','arf','drc','nympe','reprate',
+        ynames = ['year','ympe','exempt','worker','employer','selfemp','ca','arf','drc','nympe','reprate',
             'droprate','pu1','pu2','pu3','pu4','survmax60', 'survmax65', 'survage1', 'survage2',
 			 'survrate1', 'survrate2','era','nra','lra','test','supp','disab_rate','disab_base','cola',
                  'ympe_s2','worker_s1','employer_s1','worker_s2','employer_s2','selfemp_s1','selfemp_s2',
@@ -40,6 +40,7 @@ class rules:
         for y in range(2100-1966):
             self.indexation[:,y] =  self.indexation[:,y] + self.cola(1966+y)
         self.indexation = np.cumprod((np.triu(self.indexation)-np.diag(np.diag(self.indexation))+ones_lower), axis=1)
+            
     def ympe(self,year):
         if (year>self.stop):
             value = self.yrspars.loc[self.stop,'ympe']
@@ -116,6 +117,12 @@ class rules:
             value = self.yrspars.loc[self.stop,'selfemp_s2']
         else :
             value = self.yrspars.loc[year,'selfemp_s2']
+        return value
+    def ca(self,year):
+        if (year > self.stop):
+            value = self.yrspars.loc[self.stop,'ca']
+        else :
+            value = self.yrspars.loc[year,'ca']
         return value
     def arf(self,year):
         if (year > self.stop):
@@ -264,6 +271,8 @@ class rules:
         return value
     def gIndexation(self,start,stop):
         return self.indexation[start-self.start][stop-self.start]
+    def max_benefit(self,year):
+        return np.mean([self.ympe(x) for x in [max(year-x,1966) for x in range(5)]])*self.reprate(year)/12
     def chgpar(self,name,y0,y1,value):
         if (name in self.yrspars.columns):
             for i in range(y0,y1+1):
@@ -448,16 +457,20 @@ class account:
         if self.receiving==True:
             if (self.gAge(year)==self.claimage):
                 nra = self.rules.nra(year)
+                ca = self.rules.ca(year)
                 arf = self.rules.arf(year)
                 drc = self.rules.drc(year)
                 age = self.gAge(year)
+
                 self.benefit = self.rules.reprate(year) * self.ampe
                 self.benefit_s1 = self.rules.reprate_s1(year) * self.ampe_s1
                 self.benefit_s2 = self.rules.reprate_s2(year) * self.ampe_s2
+                print("benefit: ",self.benefit, "max ben",self.rules.max_benefit(year))
+                print("AF: ",1.0+(arf+int(self.rules.qpp)*ca*self.benefit/self.rules.max_benefit(year))*(age-nra))
                 if (age<nra):
-                    self.benefit *= 1.0+arf*(age-nra)
-                    self.benefit_s1 *= 1.0+arf*(age-nra)
-                    self.benefit_s2 *= 1.0+arf*(age-nra)
+                    self.benefit *= 1.0+(arf+int(self.rules.qpp)*ca*self.benefit/self.rules.max_benefit(year))*(age-nra)
+                    self.benefit_s1 *= 1.0+(arf+int(self.rules.qpp)*ca*self.benefit/self.rules.max_benefit(year))*(age-nra)
+                    self.benefit_s2 *= 1.0+(arf+int(self.rules.qpp)*ca*self.benefit/self.rules.max_benefit(year))*(age-nra)
                 else :
                     self.benefit *= 1.0+drc*(age-nra)
                     self.benefit_s1 *= 1.0+drc*(age-nra)
