@@ -465,8 +465,6 @@ class account:
                 self.benefit = self.rules.reprate(year) * self.ampe
                 self.benefit_s1 = self.rules.reprate_s1(year) * self.ampe_s1
                 self.benefit_s2 = self.rules.reprate_s2(year) * self.ampe_s2
-                print("benefit: ",self.benefit, "max ben",self.rules.max_benefit(year))
-                print("AF: ",1.0+(arf+int(self.rules.qpp)*ca*self.benefit/self.rules.max_benefit(year))*(age-nra))
                 if (age<nra):
                     self.benefit *= 1.0+(arf+int(self.rules.qpp)*ca*self.benefit/self.rules.max_benefit(year))*(age-nra)
                     self.benefit_s1 *= 1.0+(arf+int(self.rules.qpp)*ca*self.benefit/self.rules.max_benefit(year))*(age-nra)
