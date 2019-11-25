@@ -30,6 +30,10 @@ class rules:
         if (self.qpp==True):
             self.yrspars = pd.read_excel(params+'/qpp_history.xlsx',names=ynames)
         else :
+            #No ca column in cpp
+            for i,name in enumerate(ynames):   
+                if name == "ca":
+                    ynames.pop(i)
             self.yrspars = pd.read_excel(params+'/cpp_history.xlsx',names=ynames)
         self.stop  = np.max(self.yrspars['year'].values)
         self.yrspars = self.yrspars.set_index('year')
@@ -119,10 +123,13 @@ class rules:
             value = self.yrspars.loc[year,'selfemp_s2']
         return value
     def ca(self,year):
-        if (year > self.stop):
-            value = self.yrspars.loc[self.stop,'ca']
-        else :
-            value = self.yrspars.loc[year,'ca']
+        if self.qpp:
+            if (year > self.stop):
+                value = self.yrspars.loc[self.stop,'ca']
+            else :
+                value = self.yrspars.loc[year,'ca']
+        else:
+            value = 0.0
         return value
     def arf(self,year):
         if (year > self.stop):
