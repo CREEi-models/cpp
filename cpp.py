@@ -315,12 +315,13 @@ class account:
             else :
                 taxable = 0.0
             contrib = self.rules.worktax(year) * taxable
+            contrib_s1 = self.rules.worktax_s1(year) * taxable
             years = [self.history[p].year for p in range(self.ncontrib)]
             taxable_s2 = np.min( [np.max([earn-self.rules.ympe(year),0.0]) , (self.rules.ympe_s2(year)-self.rules.ympe(year))])
             contrib_s2 = self.rules.worktax_s2(year) * taxable_s2
             self.cqppcontrib = contrib +contrib_s2
             index = self.gAge(year)-18
-            self.history[index]= record(year,earn=earn,contrib = contrib,contrib_s2=contrib_s2,kids=kids)
+            self.history[index]= record(year,earn=earn,contrib = contrib,contrib_s1 = contrib_s1,contrib_s2=contrib_s2,kids=kids)
             if self.claimage!=None:
                 self.CalcPRB(year,taxable,taxable_s2,earn)
             
