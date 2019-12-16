@@ -502,7 +502,13 @@ class account:
                 self.prb_s1[self.gAge(year)-60+1] = (self.prb_s1[self.gAge(year)-60]*(1+self.rules.cola(year))+
                                                     taxable*self.rules.worktax_s1(year)*100*self.rules.supp_s1(year)/12)
                 self.prb_s2[self.gAge(year)-60+1] = (self.prb_s2[self.gAge(year)-60+1] + 
-                                                     taxable_s2*self.rules.worktax_s2(year)*100*self.rules.supp_s2(year)/12) 
+                                                     taxable_s2*self.rules.worktax_s2(year)*100*self.rules.supp_s2(year)/12)
+                if self.gAge(year)<69:
+                    for index in range(self.gAge(year)-60+2,11):
+                        self.prb[index] = self.prb[index-1]*(1+self.rules.cola(year+index))
+                        self.prb_s1[index] = self.prb_s1[index-1]*(1+self.rules.cola(year+index))
+                        self.prb_s2[index] = self.prb_s2[index-1]*(1+self.rules.cola(year+index))
+
         else:
             if year>=2014 & self.gAge(year)<70:
                 nra = self.rules.nra(year)
@@ -529,7 +535,11 @@ class account:
                     self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+drc*(age-nra)) * prb/12
                     self.prb_s1[self.gAge(year)-60+1] = self.prb_s1[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+drc*(age-nra)) * prb_s1/12
                     self.prb_s2[self.gAge(year)-60+1] = self.prb_s2[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+drc*(age-nra)) * prb_s2/12
-
+                if self.gAge(year)<69:
+                    for index in range(self.gAge(year)-60+2,11):
+                        self.prb[index] = self.prb[index-1]*(1+self.rules.cola(year+index))
+                        self.prb_s1[index] = self.prb_s1[index-1]*(1+self.rules.cola(year+index))
+                        self.prb_s2[index] = self.prb_s2[index-1]*(1+self.rules.cola(year+index))
     def gBenefit(self,year):
         if self.claimage :
             claimyear = self.gYear(self.claimage)
