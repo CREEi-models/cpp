@@ -326,6 +326,7 @@ class account:
             contrib_s1 = self.rules.worktax_s1(year) * taxable
             years = [self.history[p].year for p in range(self.ncontrib)]
             taxable_s2 = np.min( [np.max([earn-self.rules.ympe(year),0.0]) , (self.rules.ympe_s2(year)-self.rules.ympe(year))])
+            ympe = self.rules.ympe(year)
             contrib_s2 = self.rules.worktax_s2(year) * taxable_s2
             self.cqppcontrib = contrib +contrib_s2
             index = self.gAge(year)-18
@@ -565,8 +566,21 @@ class account:
             return self.prb[self.gAge(year)-60]
         else :
             return self.prb[10]*self.rules.gIndexation(self.gYear(70),year)
-        
-        
+    def gPRB_s1(self,year):
+        if self.gAge(year)<60 : 
+            return 0.0
+        elif  self.gAge(year)<self.gAge(year)<=70:
+            return self.prb_s1[self.gAge(year)-60]
+        else :
+            return self.prb_s1[10]*self.rules.gIndexation(self.gYear(70),year)    
+    def gPRB_s2(self,year):
+        if self.gAge(year)<60 : 
+            return 0.0
+        elif  self.gAge(year)<self.gAge(year)<=70:
+            return self.prb_s2[self.gAge(year)-60]
+        else :
+            return self.prb_s2[10]*self.rules.gIndexation(self.gYear(70),year) 
+
     def RunCase(self,claimage=65):
         yr18 = np.max([self.gYear(18),self.rules.start])
         start_age = self.gAge(yr18)
