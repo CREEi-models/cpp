@@ -16,7 +16,7 @@ setuptools.setup(
     install_requires=[
         "numpy",
         "pandas"
-    ]
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: To BE DETERMINE",
