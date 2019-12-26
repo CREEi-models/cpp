@@ -292,7 +292,8 @@ class rules:
                 self.yrspars.loc[i,name] = value
         else :
             for i in range(y0,y1+1):
-                self.byrpars.loc[i,name] = value
+                pass
+                #self.byrpars.loc[i,name] = value
 
 class account:
     def __init__(self,byear,rules=None):
