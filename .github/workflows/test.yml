@@ -20,7 +20,7 @@ jobs:
       run: |
         conda init bash
         conda env create -f environment.yml
-        source activate cppdev
+        source conda activate cppdev
     - name: Install cpp package
       run: |
         pip install .
