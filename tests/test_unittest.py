@@ -1,4 +1,4 @@
-import cpp
+import cpppy as cpp
 import pytest
 import warnings
 @pytest.fixture
