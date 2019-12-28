@@ -15,7 +15,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         "numpy",
-        "pandas"
+        "pandas",
+        "xlrd"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
