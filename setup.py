@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="cpppy",
+    name="cpp",
     version="0.2.0",
     author="Francois Laliberte-Auger, Pierre-Carl Michaud",
     author_email="francois.laliberte-auger@hec.ca",
