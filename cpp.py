@@ -28,15 +28,18 @@ class record:
 
 def load_rules(qpp=True):
     bnames = ['byear','era','nra','lra']
-    ynames = ['year','ympe','exempt','worker','employer','selfemp','arf','drc','nympe','reprate',
-        'droprate','pu1','pu2','pu3','pu4','survmax60', 'survmax65', 'survage1', 'survage2',
-            'survrate1', 'survrate2','era','nra','lra','test','supp','disab_rate','disab_base','cola',
-                'ympe_s2','worker_s1','employer_s1','worker_s2','employer_s2','selfemp_s1','selfemp_s2',
-                'reprate_s1', 'reprate_s2']
+    ynames = ['year','ympe','exempt','worker','employer','selfemp','ca','arf','drc','nympe','reprate',
+            'droprate','pu1','pu2','pu3','pu4','survmax60', 'survmax65', 'survage1', 'survage2',
+            'survrate1', 'survrate2','era','nra','lra','supp','disab_rate','disab_base','cola',
+            'ympe_s2','worker_s1','employer_s1','worker_s2','employer_s2','selfemp_s1','selfemp_s2',
+            'reprate_s1', 'reprate_s2','supp_s1','supp_s2']
     params = path.join(path.dirname(__file__), 'params')
     if (qpp==True):
         yrspars = pd.read_excel(params+'/qpp_history.xlsx',names=ynames)
     else :
+        for i,name in enumerate(ynames):   
+            if name == "ca":
+                ynames.pop(i)
         yrspars = pd.read_excel(params+'/cpp_history.xlsx',names=ynames)
     yrspars = yrspars.set_index('year')
     return yrspars.to_records()
@@ -49,10 +52,11 @@ spec_rules = [('qpp',boolean),
               ('stop',int64),
               ('yrspars',typeof(load_rules(qpp=True))),
               ('cpi',float64),
-              ('wgr',float64)]
+              ('wgr',float64),
+              ('indexation',float64[:,:])]
 @jitclass(spec_rules)
 class rules:
-    def __init__(self,yrspars,qpp=False):
+    def __init__(self,yrspars,qpp=False): 
         self.qpp = qpp
         self.start = 1966
         self.start_s1= 2019
@@ -60,7 +64,15 @@ class rules:
         self.yrspars = yrspars
         self.cpi = 0.02
         self.wgr = 0.03
-        self.stop = 2024 #self.yrspars['years'][self.yrspars['years'].argmax()]
+        self.stop  = np.max(self.yrspars['year'])    
+        self.indexation = np.ones((2100-1966,2100-1966))
+        ones_lower = np.tril(self.indexation)
+        for y in range(2100-1966):
+            self.indexation[:,y] =  self.indexation[:,y] + self.cola(1966+y)
+        temp_ind = (np.triu(self.indexation)-np.diag(np.diag(self.indexation))+ones_lower)
+        for i in range(self.indexation.shape[1]):
+            self.indexation[i,:] = np.cumprod(temp_ind[i,:])
+        
     def loc(self,year):
         #for i in range(len(self.yrspars['year'])):
         #    if self.yrspars['year'][i]==year:
@@ -69,6 +81,8 @@ class rules:
         return year-self.yrspars['year'][0]
         #return np.where(self.yrspars['year']==year,self.yrspars['year'],0).argmax()
         #return self.yrspars[var][index]
+       
+        
     def ympe(self,year):
         if (year>self.stop):
             value = self.yrspars['ympe'][self.loc(self.stop)]
@@ -146,6 +160,15 @@ class rules:
         else :
            value = self.yrspars['selfemp_s2'][self.loc(year)]
         return value
+    def ca(self,year):
+        if self.qpp:
+            if (year > self.stop):
+                value = self.yrspars['ca'][self.loc(self.stop)]
+            else :
+                value = self.yrspars['ca'][self.loc(year)]
+        else:
+            value = 0.0
+        return value
     def arf(self,year):
         if (year > self.stop):
             value = self.yrspars['arf'][self.loc(self.stop)]
@@ -212,6 +235,24 @@ class rules:
         else:
             yr = year
         return self.yrspars['pu4'][self.loc(yr)]
+    def supp(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+        return self.yrspars['supp'][self.loc(yr)]
+    def supp_s1(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+        return self.yrspars['supp_s1'][self.loc(yr)]
+    def supp_s2(self,year):
+        if year > self.stop :
+            yr = self.stop
+        else:
+            yr = year
+        return self.yrspars['supp_s2'][self.loc(yr)]
     def survmax60(self,year):
         if year > self.stop :
             yr = self.stop
@@ -260,18 +301,6 @@ class rules:
         else:
             yr = year
         return self.yrspars['nra'][self.loc(yr)]
-    def test(self,year):
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
-        return self.yrspars['test'][self.loc(yr)]
-    def supp(self,year):
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
-        return self.yrspars['supp'][self.loc(yr)]
     def disab_rate(self,year):
         if year > self.stop :
             yr = self.stop
@@ -286,23 +315,25 @@ class rules:
         return self.yrspars['disab_base'][self.loc(yr)]
     def cola(self,year):
         if year > self.stop :
-            yr = self.stop
+            value  = self.cpi
         else:
-            yr = year
-        return self.yrspars['cola'][self.loc(yr)]
+            value = self.yrspars['cola'][self.loc(year)]
+        return value
+    def gIndexation(self,start,stop):
+        return self.indexation[start-self.start][stop-self.start]
+    def max_benefit(self,year):
+        return np.mean(np.array([self.ympe(x) for x in np.array([max(year-x,1966) for x in range(5)])]))*self.reprate(year)/12
     #def chgpar(self,name,y0,y1,value):
     #    if (name in self.yrspars.columns):
-     #       for i in range(y0,y1+1):
-     #       self.yrspars[name][np.where(self.yrspars['year']==i,self.yrspars['year'],0).argmax()]  = value
-     #   else :
-     #       for i in range(y0,y1+1):
-     #           self.byrpars.loc[i,name] = value
-
+    #        for i in range(y0,y1+1):
+     #           self.yrspars.loc[i,name] = value
+    #    else :
+    #        for i in range(y0,y1+1):
+    #            pass
+                #self.byrpars.loc[i,name] = value
 
 tmpList = List()
-tmpList2= List()
 tmpList.append(record(1950,0.0,0.0,0.0,0.0,False,False))
-tmpList2.append(0.0)
 rule_tmp = rules(load_rules(qpp=True))
 spec_account = [('byear',int64),
                 ('claimage',int64),
@@ -318,10 +349,13 @@ spec_account = [('byear',int64),
                 ('benefit',float64),
                 ('benefit_s1',float64),
                 ('benefit_s2',float64),
-                ('prb',typeof(tmpList2)),
+                ('prb',float64[:]),
+                ('prb_s1',float64[:]),
+                ('prb_s2',float64[:]),
                 ('upe',float64[:]),
                 ('upe_s1',float64[:]),
-                ('upe_s2',float64[:])
+                ('upe_s2',float64[:]),
+                ('cqppcontrib',float64)
 ]
 @jitclass(spec_account)
 class account:
@@ -343,10 +377,10 @@ class account:
         self.benefit = 0.0
         self.benefit_s1 = 0.0
         self.benefit_s2 = 0.0
-        prb = List()
-        for x in range(10):
-            prb.append(0.0)
-        self.prb = prb
+        self.prb = np.zeros(11)
+        self.prb_s1 = np.zeros(11)
+        self.prb_s2 = np.zeros(11)
+        self.cqppcontrib = 0.0
 
     def MakeContrib(self,year,earn,kids=False):
         if year>=self.rules.start:
@@ -359,9 +393,9 @@ class account:
             contrib_s1 = self.rules.worktax_s1(year) * taxable
 
             #years = [self.history[p].year for p in range(self.ncontrib)]
-
-            taxable_s2 = np.min(np.array([np.max(np.array([earn-self.rules.ympe(year),0.0])),(self.rules.ympe_s2(year)-1)*self.rules.ympe(year)]))
+            taxable_s2 = np.min(np.array([np.max(np.array([earn-self.rules.ympe(year),0.0])),(self.rules.ympe_s2(year)-self.rules.ympe(year))]))
             contrib_s2 = self.rules.worktax_s2(year) * taxable_s2
+            self.cqppcontrib = contrib +contrib_s2
             index = self.gAge(year)-18
             self.history[index]= record(year,earn,contrib,contrib_s1,contrib_s2,kids,False)
             if self.claimage!=0:
@@ -512,20 +546,22 @@ class account:
         if self.receiving==True:
             if (self.gAge(year)==self.claimage):
                 nra = self.rules.nra(year)
+                ca = self.rules.ca(year)
                 arf = self.rules.arf(year)
                 drc = self.rules.drc(year)
                 age = self.gAge(year)
+
                 self.benefit = self.rules.reprate(year) * self.ampe
                 self.benefit_s1 = self.rules.reprate_s1(year) * self.ampe_s1
                 self.benefit_s2 = self.rules.reprate_s2(year) * self.ampe_s2
                 if (age<nra):
-                    self.benefit *= 1.0+arf*(age-nra)
-                    self.benefit_s1 *= 1.0+arf*(age-nra)
-                    self.benefit_s2 *= 1.0+arf*(age-nra)
+                    self.benefit *= 1.0+(arf+int(self.rules.qpp)*ca*self.benefit/self.rules.max_benefit(year))*(age-nra)
+                    self.benefit_s1 *= 1.0+(arf+int(self.rules.qpp)*ca*self.benefit/self.rules.max_benefit(year))*(age-nra)
+                    self.benefit_s2 *= 1.0+(arf+int(self.rules.qpp)*ca*self.benefit/self.rules.max_benefit(year))*(age-nra)
                 else :
                     self.benefit *= 1.0+drc*(age-nra)
                     self.benefit_s1 *= 1.0+drc*(age-nra)
-                    self.benefit_s2 *= 1.0+drc*(age-nra)
+                    self.benefit_s2 *= 1.0+drc*(age-nra)              
         else:
             self.benefit = 0.0
             self.benefit_s1 = 0.0
@@ -533,10 +569,20 @@ class account:
     def CalcPRB(self,year,taxable,taxable_s2,earn):
         if self.rules.qpp:
             if year>=2014:
-                prb = self.prb[self.gAge(year)-60]+taxable*(0.005+self.rules.worktax_s1(year)*100*0.0016)
-                self.prb[self.gAge(year)-60+1] = prb + taxable_s2*0.0066
+                self.prb[self.gAge(year)-60+1] = (self.prb[self.gAge(year)-60]*(1+self.rules.cola(year))
+                                                  + taxable*self.rules.supp(year)/12)
+                self.prb_s1[self.gAge(year)-60+1] = (self.prb_s1[self.gAge(year)-60]*(1+self.rules.cola(year))+
+                                                    taxable*self.rules.worktax_s1(year)*100*self.rules.supp_s1(year)/12)
+                self.prb_s2[self.gAge(year)-60+1] = (self.prb_s2[self.gAge(year)-60+1] + 
+                                                     taxable_s2*self.rules.worktax_s2(year)*100*self.rules.supp_s2(year)/12)
+                if self.gAge(year)<69:
+                    for index in range(self.gAge(year)-60+2,11):
+                        self.prb[index] = self.prb[index-1]*(1+self.rules.cola(year+index))
+                        self.prb_s1[index] = self.prb_s1[index-1]*(1+self.rules.cola(year+index))
+                        self.prb_s2[index] = self.prb_s2[index-1]*(1+self.rules.cola(year+index))
+
         else:
-            if year>=2013 & self.gAge(year)<70:
+            if year>=2014 & self.gAge(year)<70:
                 nra = self.rules.nra(year)
                 arf = self.rules.arf(year)
                 drc = self.rules.drc(year)
@@ -545,15 +591,67 @@ class account:
                 if upe<self.rules.exempt(year) : upe = 0
                 #upe_s2 Need to start only in 2024
                 upe_s2 = np.max(np.array([np.min(np.array([earn-self.rules.ympe(year),self.rules.ympe_s2(year)-self.rules.ympe(year)])),0.0]))
-                #PRB base + PRB S1
-                prb = upe/self.rules.ympe(year) * self.rules.ympe(year+1)*(0.00625+self.rules.worktax_s1(year)*100*0.00208)
+                #PRB base
+                prb = upe/self.rules.ympe(year) * self.rules.ympe(year+1)*self.rules.supp(year)
+                # PRB S1
+                prb_s1 = upe/self.rules.ympe(year) * self.rules.ympe(year+1)*self.rules.worktax_s1(year)*100*self.rules.supp_s1(year)
                 #PRB S2
-                prb = prb + upe_s2/(self.rules.ympe_s2(year)-self.rules.ympe(year))*(self.rules.ympe_s2(year+1)-self.rules.ympe(year+1)) * 0.00833
+                if upe_s2>0:
+                    prb_s2 = upe_s2/(self.rules.ympe_s2(year)-self.rules.ympe(year))*(self.rules.ympe_s2(year+1)-self.rules.ympe(year+1)) * self.rules.supp_s1(year)
                 #Ajustment factor
                 if (age<nra):
-                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60] + (1.0+arf*(age-nra)) * prb
+                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+arf*(age-nra)) * prb/12
+                    self.prb_s1[self.gAge(year)-60+1] = self.prb_s1[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+arf*(age-nra)) * prb_s1/12
+                    self.prb_s2[self.gAge(year)-60+1] = self.prb_s2[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+arf*(age-nra)) * prb_s2/12
                 else :
-                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60] + (1.0+drc*(age-nra)) * prb
+                    self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+drc*(age-nra)) * prb/12
+                    self.prb_s1[self.gAge(year)-60+1] = self.prb_s1[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+drc*(age-nra)) * prb_s1/12
+                    self.prb_s2[self.gAge(year)-60+1] = self.prb_s2[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+drc*(age-nra)) * prb_s2/12
+                if self.gAge(year)<69:
+                    for index in range(self.gAge(year)-60+2,11):
+                        self.prb[index] = self.prb[index-1]*(1+self.rules.cola(year+index))
+                        self.prb_s1[index] = self.prb_s1[index-1]*(1+self.rules.cola(year+index))
+                        self.prb_s2[index] = self.prb_s2[index-1]*(1+self.rules.cola(year+index))
+    def gBenefit(self,year):
+        if self.claimage :
+            claimyear = self.gYear(self.claimage)
+            return self.benefit * self.rules.gIndexation(claimyear,year)
+        else :
+            return self.benefit
+    def gBenefit_s1(self,year):
+        if self.claimage :
+            claimyear = self.gYear(self.claimage)
+            return self.benefit_s1 * self.rules.gIndexation(claimyear,year)
+        else :
+            return self.benefit_s1
+    def gBenefit_s2(self,year):
+        if self.claimage :
+            claimyear = self.gYear(self.claimage)
+            return self.benefit_s2 * self.rules.gIndexation(claimyear,year)
+        else :
+            return self.benefit_s2
+    def gPRB(self,year):
+        if self.gAge(year)<60 : 
+            return 0.0
+        elif  self.gAge(year)<self.gAge(year)<=70:
+            return self.prb[self.gAge(year)-60]
+        else :
+            return self.prb[10]*self.rules.gIndexation(self.gYear(70),year)
+    def gPRB_s1(self,year):
+        if self.gAge(year)<60 : 
+            return 0.0
+        elif  self.gAge(year)<self.gAge(year)<=70:
+            return self.prb_s1[self.gAge(year)-60]
+        else :
+            return self.prb_s1[10]*self.rules.gIndexation(self.gYear(70),year)    
+    def gPRB_s2(self,year):
+        if self.gAge(year)<60 : 
+            return 0.0
+        elif  self.gAge(year)<self.gAge(year)<=70:
+            return self.prb_s2[self.gAge(year)-60]
+        else :
+            return self.prb_s2[10]*self.rules.gIndexation(self.gYear(70),year) 
+
     def RunCase(self,claimage,retage,ratio_list):
         yr18 = np.max(np.array([self.gYear(18),self.rules.start]))
         start_age = self.gAge(yr18)
@@ -569,38 +667,38 @@ class account:
         if self.claimage==0: self.ClaimCPP(self.gYear(claimage))
         return
 
-    def SetHistory_ratio(self,retage=60, **kwargs):
-        self.retage = retage
-        yr18 = np.max(np.array([self.gYear(18),self.rules.start]))
-        start_age = self.gAge(yr18)
-        nyears = self.retage - start_age
-        self.ratio_list = [1]*nyears
-        nargs = len(kwargs)
-        niter=0
-        for key,val in kwargs.items():
-            temp_list= [x for x in val.values()]
-            for i in np.arange(niter,niter+temp_list[1]):
-                self.ratio_list[i] = temp_list[0]
-                niter += 1
-        return
+    # def SetHistory_ratio(self,retage=60, **kwargs):
+    #     self.retage = retage
+    #     yr18 = np.max(np.array([self.gYear(18),self.rules.start]))
+    #     start_age = self.gAge(yr18)
+    #     nyears = self.retage - start_age
+    #     self.ratio_list = [1]*nyears
+    #     nargs = len(kwargs)
+    #     niter=0
+    #     for key,val in kwargs.items():
+    #         temp_list= [x for x in val.values()]
+    #         for i in np.arange(niter,niter+temp_list[1]):
+    #             self.ratio_list[i] = temp_list[0]
+    #             niter += 1
+    #     return
     
-    def SetHistory_fam(self, claimage = 65, age_birth=[]):
-        self.age_birth = age_birth       
-        yr18 = np.max(np.array([self.gYear(18),self.rules.start]))
-        start_age = self.gAge(yr18)
-        nyears = claimage - start_age
-        self.kids_list = [False]*nyears
-        for x in range(len(age_birth)):
-            indice = age_birth[x] - start_age
-            if age_birth[x]>=start_age and age_birth[x]<= 50:
-                for yr in range(7):
-                    self.kids_list[indice+yr] = True
-            if age_birth[x]>=start_age and age_birth[x]>50:
-                print("Please check age at birth")
-            else :
-                years_deduc = 7 - (start_age - age_birth[x])
-                for yr in range(years_deduc):
-                    self.kids_list[yr] = True
+    # def SetHistory_fam(self, claimage = 65, age_birth=[]):
+    #     self.age_birth = age_birth       
+    #     yr18 = np.max(np.array([self.gYear(18),self.rules.start]))
+    #     start_age = self.gAge(yr18)
+    #     nyears = claimage - start_age
+    #     self.kids_list = [False]*nyears
+    #     for x in range(len(age_birth)):
+    #         indice = age_birth[x] - start_age
+    #         if age_birth[x]>=start_age and age_birth[x]<= 50:
+    #             for yr in range(7):
+    #                 self.kids_list[indice+yr] = True
+    #         if age_birth[x]>=start_age and age_birth[x]>50:
+    #             print("Please check age at birth")
+    #         else :
+    #             years_deduc = 7 - (start_age - age_birth[x])
+    #             for yr in range(years_deduc):
+    #                 self.kids_list[yr] = True
 
 
     def ResetCase(self):
