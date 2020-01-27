@@ -40,7 +40,7 @@ class rules:
         self.cpi = 0.02
         self.wgr = 0.03
 	self.lastyear = 2019
-        self.indexation = np.ones((2100-1966,2100-1966))
+	self.indexation = np.ones((2100-1966,2100-1966))
         ones_lower = np.tril(self.indexation)
         for y in range(2100-1966):
             self.indexation[:,y] =  self.indexation[:,y] + self.cola(1966+y)
