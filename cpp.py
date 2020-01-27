@@ -39,6 +39,7 @@ class rules:
         self.yrspars = self.yrspars.set_index('year')
         self.cpi = 0.02
         self.wgr = 0.03
+	self.lastyear = 2019
         self.indexation = np.ones((2100-1966,2100-1966))
         ones_lower = np.tril(self.indexation)
         for y in range(2100-1966):
@@ -46,9 +47,9 @@ class rules:
         self.indexation = np.cumprod((np.triu(self.indexation)-np.diag(np.diag(self.indexation))+ones_lower), axis=1)
             
     def ympe(self,year):
-        if (year>self.stop):
-            value = self.yrspars.loc[self.stop,'ympe']
-            value *= (1.0+self.wgr)**(year-self.stop)
+        if (year>self.lastyear):
+            value = self.yrspars.loc[self.lastyear,'ympe']
+            value *= (1.0+self.wgr)**(year-self.lastyear)
         else:
             value = self.yrspars.loc[year,'ympe']
         return value
