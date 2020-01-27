@@ -37,9 +37,6 @@ def load_rules(qpp=True):
     if (qpp==True):
         yrspars = pd.read_excel(params+'/qpp_history.xlsx',names=ynames)
     else :
-        for i,name in enumerate(ynames):   
-            if name == "ca":
-                ynames.pop(i)
         yrspars = pd.read_excel(params+'/cpp_history.xlsx',names=ynames)
     yrspars = yrspars.set_index('year')
     return yrspars.to_records()
@@ -56,7 +53,7 @@ spec_rules = [('qpp',boolean),
               ('indexation',float64[:,:])]
 @jitclass(spec_rules)
 class rules:
-    def __init__(self,yrspars,qpp=False): 
+    def __init__(self,yrspars,qpp=True): 
         self.qpp = qpp
         self.start = 1966
         self.start_s1= 2019
