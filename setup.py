@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="cpp",
+    name="srp",
     version="0.2.0",
     author="Francois Laliberte-Auger, Pierre-Carl Michaud",
     author_email="francois.laliberte-auger@hec.ca",
@@ -13,6 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/rsi-models/cpp",
     packages=setuptools.find_packages(),
+    include_package_data=True,
     install_requires=[
         "numpy",
         "pandas",
