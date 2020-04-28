@@ -1,2 +1,10 @@
 *checkpoint.ipynb
 *.pyc
+*egg*
+dist/
+build/
+.pytest_cache/
+__pycache__/
+settings.json
+.vscodes/
+.DS_Store
