@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="fr" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="fr" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Documentation des fonctions de SRP &mdash; Documentation Simulateur de régime de pension publique (SRP) 0.1</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script src="_static/translations.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Recherche" href="search.html" />
+    <link rel="prev" title="Premier pas avec le SRP" href="overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Simulateur de régime de pension publique (SRP)
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Premier pas avec le SRP</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation des fonctions de SRP</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Simulateur de régime de pension publique (SRP)</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Documentation des fonctions de SRP</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/code.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="documentation-des-fonctions-de-srp">
+<h1>Documentation des fonctions de SRP<a class="headerlink" href="#documentation-des-fonctions-de-srp" title="Lien permanent vers ce titre">¶</a></h1>
+<dl class="py class">
+<dt id="srp.record">
+<em class="property">class </em><code class="sig-prename descclassname">srp.</code><code class="sig-name descname">record</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">year</span></em>, <em class="sig-param"><span class="n">earn</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">contrib</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">contrib_s1</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">contrib_s2</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">kids</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">disab</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#srp.record" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Information pour une année.</p>
+<p>Cette classe permet d’enregistrer une année d’information. Les instances de
+cette classe sont regroupées dans la List account.history.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>year</strong> (<em>int</em>) – année de l’enregistrement</p></li>
+<li><p><strong>earn</strong> (<em>float</em>) – gain admissible</p></li>
+<li><p><strong>contrib</strong> (<em>float</em>) – contribution au régime de base</p></li>
+<li><p><strong>contrib_s1</strong> (<em>float</em>) – contribution au régime supplémentaire  pour la hausse du taux de remplacement</p></li>
+<li><p><strong>contrib_s2</strong> (<em>float</em>) – contribution au régime supplémentaire  pour la hausse du salaire adminissible (114%MGA)</p></li>
+<li><p><strong>kids</strong> (<em>boolean</em>) – enfants de moins de 7  True seulemet pour la personne admissible à l’exemption pour enfants</p></li>
+<li><p><strong>disab</strong> (<em>boolean</em>) – pension d’invalidité</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="srp.rules">
+<em class="property">class </em><code class="sig-prename descclassname">srp.</code><code class="sig-name descname">rules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qpp</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#srp.rules" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Règle des régimes RPC et RRQ</p>
+<p>Une instance de cette classe charge soit les pamamètres pour le
+RRQ (qpp=True) ou pour le RPC (qpp=False). Les paramètres jusqu’en 2025 sont
+dans params/qpp_history.xlsx et params/cpp_history.xlsx. Passé 2025 les
+différentes méthodes retournent soit la valeur de 2025 ou la valeur actualisé,
+dépendant du paramètre. En générale pour accéder à un paramètre pour une année
+donnée il suffit d’appeler la méthode rules.&lt;param&gt;(year).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres</dt>
+<dd class="field-odd"><p><strong>qpp</strong> (<em>boolean</em>) – Prend la valeur True pour charger les paramètres de RRQ sinon charge RPC</p>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>cpi</strong> (<em>float</em>) – taux d’indexation</p></li>
+<li><p><strong>wgr</strong> (<em>float</em>) – taux d’augmentation de YMPE</p></li>
+<li><p><strong>lastyear</strong> (<em>int</em>) – lastyear + 1 : année à partir de la quelle rules.cpi et rules.wgr est
+utilisé à la place des valeurs du fichier de paramètre.</p></li>
+<li><p><strong>self.indexation</strong> (<em>float</em><em>(</em><em>NxN</em><em>)</em>) – tableau pre-calculé d’indexation de 1966 à 2100</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="srp.rules.exempt">
+<code class="sig-name descname">exempt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">year</span></em><span class="sig-paren">)</span><a class="headerlink" href="#srp.rules.exempt" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Renvoie</dt>
+<dd class="field-odd"><p><em>float</em> – Montant de l’exemption. Fixe après 2025.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="srp.rules.worktax">
+<code class="sig-name descname">worktax</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">year</span></em><span class="sig-paren">)</span><a class="headerlink" href="#srp.rules.worktax" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Renvoie</dt>
+<dd class="field-odd"><p><em>float</em> – Taux de contribution de l’employé au régime de base. Fixe après 2025.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="srp.rules.worktax_s1">
+<code class="sig-name descname">worktax_s1</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">year</span></em><span class="sig-paren">)</span><a class="headerlink" href="#srp.rules.worktax_s1" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Renvoie</dt>
+<dd class="field-odd"><p><em>float</em> – Taux de contribution de l’employé au régime supplémentaire 1. Fixe après 2025.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="srp.rules.worktax_s2">
+<code class="sig-name descname">worktax_s2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">year</span></em><span class="sig-paren">)</span><a class="headerlink" href="#srp.rules.worktax_s2" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Renvoie</dt>
+<dd class="field-odd"><p><em>float</em> – Taux de contribution de l’employé au régime supplémentaire 2.
+Fixe après 2025.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="srp.rules.ympe">
+<code class="sig-name descname">ympe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">year</span></em><span class="sig-paren">)</span><a class="headerlink" href="#srp.rules.ympe" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Paramètres</dt>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+</dd>
+<dt class="field-even">Renvoie</dt>
+<dd class="field-even"><p><em>float</em> – MGA pour une année donné. Indexé à wgr pour les années &gt; 2025</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="srp.rules.ympe_s2">
+<code class="sig-name descname">ympe_s2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">year</span></em><span class="sig-paren">)</span><a class="headerlink" href="#srp.rules.ympe_s2" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Paramètres</dt>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+</dd>
+<dt class="field-even">Renvoie</dt>
+<dd class="field-even"><p><em>float</em> – Montant du MGA pour le régime supplémentaire. 0 avant 2024.
+Indexé à wgr après 2025.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="overview.html" class="btn btn-neutral float-left" title="Premier pas avec le SRP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Équipe CREEi
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

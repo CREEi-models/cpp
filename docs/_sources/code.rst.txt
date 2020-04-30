@@ -1,0 +1,7 @@
+Documentation des fonctions de SRP
+=====================================
+
+.. currentmodule:: srp
+.. autoclass:: record
+.. autoclass:: rules
+  
