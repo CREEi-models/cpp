@@ -5,6 +5,29 @@ import pandas as pd
 from os import path
 
 class record:
+    """
+    Information pour une année.
+
+    Cette classe permet d'enregistrer une année d'information. Les instances de 
+    cette classe sont regroupées dans la List account.history.
+
+    Parameters
+    __________
+    year : int
+        année de l'enregistrement
+    earn : float
+        gain admissible
+    contrib : float
+        contribution au régime de base
+    contrib_s1 : float
+        contribution au régime supplémentaire  pour la hausse du taux de remplacement
+    contrib_s2 : float 
+        contribution au régime supplémentaire  pour la hausse du salaire adminissible (114%MGA)
+    kids : boolean
+        enfants de moins de 7  True seulemet pour la personne admissible à l'exemption pour enfants
+    disab : boolean
+        pension d'invalidité
+    """
     def __init__(self,year,earn=0.0,contrib=0.0, contrib_s1=0.0, contrib_s2=0.0, kids=False,disab=False):
         self.year = year
         self.earn = earn
@@ -15,6 +38,33 @@ class record:
         self.disab = disab
 
 class rules:
+    """
+    Règle des régimes RPC et RRQ
+
+    Une instance de cette classe charge soit les pamamètres pour le 
+    RRQ (qpp=True) ou pour le RPC (qpp=False). Les paramètres jusqu'en 2025 sont
+    dans params/qpp_history.xlsx et params/cpp_history.xlsx. Passé 2025 les 
+    différentes méthodes retournent soit la valeur de 2025 ou la valeur actualisé, 
+    dépendant du paramètre. En générale pour accéder à un paramètre pour une année 
+    donnée il suffit d'appeler la méthode rules.<param>(year).
+
+    Parameters
+    __________
+    qpp : boolean
+        Prend la valeur True pour charger les paramètres de RRQ sinon charge RPC
+    
+    Attributes
+    __________
+    cpi : float
+        taux d'indexation
+    wgr : float
+        taux d'augmentation de YMPE
+    lastyear : int
+        lastyear + 1 : année à partir de la quelle rules.cpi et rules.wgr est 
+        utilisé à la place des valeurs du fichier de paramètre.
+    self.indexation : float(NxN)
+        tableau pre-calculé d'indexation de 1966 à 2100    
+    """
     def __init__(self,qpp=False):
         bnames = ['byear','era','nra','lra']
         ynames = ['year','ympe','exempt','worker','employer','selfemp','ca','arf','drc','nympe','reprate',
@@ -47,6 +97,16 @@ class rules:
         self.indexation = np.cumprod((np.triu(self.indexation)-np.diag(np.diag(self.indexation))+ones_lower), axis=1)
             
     def ympe(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            MGA pour une année donné. Indexé à wgr pour les années > 2025
+        """
         if (year>self.lastyear):
             value = self.yrspars.loc[self.lastyear,'ympe']
             value *= (1.0+self.wgr)**(year-self.lastyear)
@@ -54,28 +114,69 @@ class rules:
             value = self.yrspars.loc[year,'ympe']
         return value
     def ympe_s2(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+             Montant du MGA pour le régime supplémentaire. 0 avant 2024. 
+             Indexé à wgr après 2025.
+        """
         value = self.ympe(year)
         value *= self.yrspars.loc[min(year,self.stop),'ympe_s2']
         return value
     def exempt(self,year):
+        """
+        Return
+        ______
+        float
+            Montant de l'exemption. Fixe après 2025.
+
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'exempt']
         else :
            value = self.yrspars.loc[year,'exempt']
         return value
     def worktax(self,year):
+        """
+        Return
+        ______
+        float
+            Taux de contribution de l'employé au régime de base. Fixe après 2025.
+
+        """
+
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'worker']
         else :
            value = self.yrspars.loc[year,'worker']
         return value
     def worktax_s1(self,year):
+        """
+        Return
+        ______
+        float
+            Taux de contribution de l'employé au régime supplémentaire 1. Fixe après 2025.
+
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'worker_s1']
         else :
             value = self.yrspars.loc[year,'worker_s1']
         return value
     def worktax_s2(self,year):
+        """
+        Return
+        ______
+        float
+            Taux de contribution de l'employé au régime supplémentaire 2. 
+            Fixe après 2025.
+
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'worker_s2']
         else :
@@ -297,6 +398,22 @@ class rules:
                 #self.byrpars.loc[i,name] = value
 
 class account:
+    """
+    Classe principal regroupant l'information sur un individu et comprenant les
+    fonctions de calcul.
+    
+    Principal interface avec le simulateur. Chaque individu simulé doit avoir une
+    instance de classe. 
+
+    Parameters
+    __________
+    byear : int
+        année de naissance
+    rules : rules
+        une instance de la classe rules.
+    
+    
+    """
     def __init__(self,byear,rules=None):
         self.byear = byear
         self.claimage = None
