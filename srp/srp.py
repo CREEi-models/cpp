@@ -28,12 +28,16 @@ class record:
     disab : boolean
         pension d'invalidité
     """
-    def __init__(self,year,earn=0.0,contrib=0.0, contrib_s1=0.0, contrib_s2=0.0, kids=False,disab=False):
+    def __init__(self,year,earn=0.0,contrib=0.0, contrib_s1=0.0, contrib_s2=0.0,
+                      contrib_aut=0,contrib_aut_s1=0,contrib_aut_s2=0,kids=False,disab=False):
         self.year = year
         self.earn = earn
         self.contrib = contrib
         self.contrib_s1 = contrib_s1
         self.contrib_s2 = contrib_s2
+        self.contrib_aut = contrib_aut
+        self.contrib_aut_s1 = contrib_aut_s1
+        self.contrib_aut_s2 = contrib_aut_s2
         self.kids = kids
         self.disab = disab
 
@@ -434,22 +438,46 @@ class account:
         self.prb_s2 = [0 for x in range(11)]
         self.cqppcontrib = 0.0
 
-    def MakeContrib(self,year,earn,kids=False):
+    def MakeContrib(self,year,earn,earn_aut=0,kids=False):
         if year>=self.rules.start:
-            taxable = np.min([earn,self.rules.ympe(year)])
-            if taxable > self.rules.exempt(year):
-                taxable -= self.rules.exempt(year)
-            else :
-                taxable = 0.0
+            if earn>=self.rules.ympe(year):
+                taxable = self.rules.ympe(year)
+                taxable_aut = 0
+            elif (earn+earn_aut) >=self.rules.ympe(year):
+                taxable = earn
+                taxable_aut = self.rules.ympe(year)-taxable
+            else:
+                taxable = earn
+                taxable_aut = earn_aut
+                if taxable >=self.rules.exempt(year):
+                    taxable -= self.rules.exempt(year)
+                elif taxable + taxable_aut >=self.rules.exempt(year):                 
+                    taxable_aut -= (self.rules.exempt(year)-taxable)
+                    taxable = 0.0
+                else:
+                    taxable = 0.0
+                    taxable_aut = 0.0
+
+
             contrib = self.rules.worktax(year) * taxable
+            contrib_aut = self.rules.worktax(year) * taxable_aut * 2
             contrib_s1 = self.rules.worktax_s1(year) * taxable
-            years = [self.history[p].year for p in range(self.ncontrib)]
+            contrib_aut_s1 = self.rules.worktax_s1(year) * taxable_aut * 2 
+
             taxable_s2 = np.min( [np.max([earn-self.rules.ympe(year),0.0]) , (self.rules.ympe_s2(year)-self.rules.ympe(year))])
-            ympe = self.rules.ympe(year)
+            if taxable_s2>0.0:
+                if taxable_s2<(self.rules.ympe_s2(year)-self.rules.ympe(year)):
+                   taxable_aut_s2 =  np.min(taxable_aut,(self.rules.ympe_s2(year)-self.rules.ympe(year))-taxable_s2)
+                else :
+                    taxable_aut_s2 = 0.0
+            else:
+                taxable_aut_s2 = 0.0
             contrib_s2 = self.rules.worktax_s2(year) * taxable_s2
+            contrib_aut_s2 = self.rules.worktax_s2(year) * taxable_aut_s2 * 2
             self.cqppcontrib = contrib +contrib_s2
             index = self.gAge(year)-18
-            self.history[index]= record(year,earn=earn,contrib = contrib,contrib_s1 = contrib_s1,contrib_s2=contrib_s2,kids=kids)
+            self.history[index]= record(year,earn=earn+earn_aut,contrib = contrib,contrib_s1 = contrib_s1,contrib_s2=contrib_s2,
+                                        contrib_aut = contrib_aut,contrib_aut_s1 = contrib_aut_s1,contrib_aut_s2=contrib_aut_s2,kids=kids)
             if self.claimage!=None:
                 self.CalcPRB(year,taxable,taxable_s2,earn)
             
