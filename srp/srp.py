@@ -441,11 +441,11 @@ class account:
     def MakeContrib(self,year,earn,earn_aut=0,kids=False):
         if year>=self.rules.start:
             if earn>=self.rules.ympe(year):
-                taxable = self.rules.ympe(year)
+                taxable = self.rules.ympe(year)-self.rules.exempt(year)
                 taxable_aut = 0
             elif (earn+earn_aut) >=self.rules.ympe(year):
-                taxable = earn
-                taxable_aut = self.rules.ympe(year)-taxable
+                taxable = earn-self.rules.exempt(year)
+                taxable_aut = self.rules.ympe(year)-earn
             else:
                 taxable = earn
                 taxable_aut = earn_aut
