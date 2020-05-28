@@ -4,11 +4,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="srp",
+    name="srpp",
     version="0.3.0",
     author="Francois Laliberte-Auger, Pierre-Carl Michaud",
     author_email="francois.laliberte-auger@hec.ca",
-    description="Module to simulate CPP and QPP",
+    description="Module pour simuler prestations pensions publiques Canada",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/rsi-models/srp",

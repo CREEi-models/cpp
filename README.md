@@ -1,2 +1,2 @@
-# cpp
-CPP (and QPP) benefit computations
+# srpp
+Simulateur de revenu de pensions publiques au Canada
