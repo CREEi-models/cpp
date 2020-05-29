@@ -1,3 +1,3 @@
-rm dist/*
+rm -rf dist/*
 python setup.py sdist bdist_wheel 
-twine upload --repository testpypi dist/* --verbose
+twine upload --repository pypi dist/* --verbose

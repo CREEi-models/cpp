@@ -3,7 +3,7 @@ import pytest
 
 @pytest.fixture
 def rules():
-    rules = srp.rules(qpp=True)
+    rules = srpp.rules(qpp=True)
     return rules
 
 ympe_value = [(1966, 5000),
