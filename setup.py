@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="srpp",
-    version="0.4.0",
+    version="0.5.0",
     author="Francois Laliberte-Auger, Pierre-Carl Michaud",
     author_email="francois.laliberte-auger@hec.ca",
     description="Module pour simuler prestations pensions publiques Canada",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/rsi-models/srp",
+    url="https://github.com/rsi-models/srpp",
     packages=setuptools.find_packages(),
     include_package_data=True,
     classifiers=[
