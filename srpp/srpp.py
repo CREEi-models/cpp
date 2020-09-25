@@ -444,8 +444,12 @@ class account:
                 taxable = self.rules.ympe(year)-self.rules.exempt(year)
                 taxable_aut = 0
             elif (earn+earn_aut) >=self.rules.ympe(year):
-                taxable = earn-self.rules.exempt(year)
-                taxable_aut = self.rules.ympe(year)-earn
+                if earn >= self.rules.exempt(year):
+                    taxable = earn-self.rules.exempt(year)
+                    taxable_aut = self.rules.ympe(year)-earn
+                else :
+                    taxable = 0
+                    taxable_aut = self.rules.ympe(year) - self.rules.exempt(year)
             else:
                 taxable = earn
                 taxable_aut = earn_aut
@@ -467,7 +471,7 @@ class account:
             taxable_s2 = np.min( [np.max([earn-self.rules.ympe(year),0.0]) , (self.rules.ympe_s2(year)-self.rules.ympe(year))])
             if taxable_s2>0.0:
                 if taxable_s2<(self.rules.ympe_s2(year)-self.rules.ympe(year)):
-                   taxable_aut_s2 =  np.min(taxable_aut,(self.rules.ympe_s2(year)-self.rules.ympe(year))-taxable_s2)
+                   taxable_aut_s2 =  np.min([taxable_aut,(self.rules.ympe_s2(year)-self.rules.ympe(year))-taxable_s2])
                 else :
                     taxable_aut_s2 = 0.0
             else:
