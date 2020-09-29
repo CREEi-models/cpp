@@ -9,7 +9,9 @@ class record:
     Information pour une année.
 
     Cette classe permet d'enregistrer une année d'information. Les instances de 
-    cette classe sont regroupées dans la List account.history.
+    cette classe sont regroupées dans la List account.history. Habituellement
+    l'utilisateur utilisera la méthode MakeContrib() de la classe account pour 
+    creer des record.
 
     Parameters
     __________
@@ -134,6 +136,10 @@ class rules:
         return value
     def exempt(self,year):
         """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
         Return
         ______
         float
@@ -147,6 +153,10 @@ class rules:
         return value
     def worktax(self,year):
         """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
         Return
         ______
         float
@@ -161,6 +171,10 @@ class rules:
         return value
     def worktax_s1(self,year):
         """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
         Return
         ______
         float
@@ -174,6 +188,10 @@ class rules:
         return value
     def worktax_s2(self,year):
         """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
         Return
         ______
         float
@@ -187,48 +205,143 @@ class rules:
             value = self.yrspars.loc[year,'worker_s2']
         return value
     def empltax(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            Taux de contribution de l'employeur au régime de base. Fixe après 2025.
+
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'employer']
         else :
            value = self.yrspars.loc[year,'employer']
         return value
     def empltax_s1(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            Taux de contribution de l'employeur au régime supplémentaire 1. Fixe après 2025.
+
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'employer_s1']
         else :
             value = self.yrspars.loc[year,'employer_s1']
         return value
     def empltax_s2(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            Taux de contribution de l'employeur au régime supplémentaire 2. 
+            Fixe après 2025.
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'employer_s2']
         else :
             value = self.yrspars.loc[year,'employer_s2']
         return value
     def tax(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            Taux de contribution de l'employeur et de l'employé au régime de base. 
+        """
         return self.worktax(year)+self.empltax(year)
     def tax_s1(self,year):
+        """
+        Return
+        ______
+        float
+            Taux de contribution de l'employeur et de l'employé au régime supplémentaire 1. 
+        """
         return self.worktax_s1(year)+self.empltax_s1(year)
     def tax_s2(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            Taux de contribution de l'employeur et de l'employé au régime supplémentaire 2. 
+        """
         return self.worktax_s2(year)+self.empltax_s2(year)
     def selftax(self,year):
+        """
+        Return
+        ______
+        float
+            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime de base. 
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'selfemp']
         else :
             value = self.yrspars.loc[year,'selfemp']
         return value
     def selftax_s1(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime supplémentaire 1. 
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'selfemp_s1']
         else :
             value = self.yrspars.loc[year,'selfemp_s1']
         return value
     def selftax_s2(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime supplémentaire 2. 
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'selfemp_s2']
         else :
             value = self.yrspars.loc[year,'selfemp_s2']
         return value
     def ca(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            nouveau facteur d'ajustement de la pénalité en fonction du revenu pour RRQ 
+        """ 
         if self.qpp:
             if (year > self.stop):
                 value = self.yrspars.loc[self.stop,'ca']
@@ -238,168 +351,376 @@ class rules:
             value = 0.0
         return value
     def arf(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            taux pénalité avant 65
+        """ 
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'arf']
         else :
             value = self.yrspars.loc[year,'arf']
         return value
     def drc(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            taux bonification après 65
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'drc']
         else :
             value = self.yrspars.loc[year,'drc']
         return value
     def nympe(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            nombre d'année pour calculé ympe moyen
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'nympe']
         else :
             value = self.yrspars.loc[year,'nympe']
         return value
     def reprate(self,year):
+        """
+         Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            taux de remplacement régime de base
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'reprate']
         else :
             value = self.yrspars.loc[year,'reprate']
         return value
     def reprate_s1(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            taux de remplacement régime supplémentaire 1
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'reprate_s1']
         else :
             value = self.yrspars.loc[year,'reprate_s1']
         return value
     def reprate_s2(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            taux de remplacement régime supplémentaire 1
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'reprate_s2']
         else :
             value = self.yrspars.loc[year,'reprate_s2']
         return value
     def droprate(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            taux d'année droppé
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'droprate']
         else :
             value = self.yrspars.loc[year,'droprate']
         return value
     def pu1(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            PAS UTILISER 
+        """
         if year > self.stop :
             yr = self.stop
         else:
             yr = year
         return self.yrspars.loc[yr,'pu1']
     def pu2(self,year):
+        """
+        Return
+        ______
+        float
+            PAS UTILISER 
+        """
         if year > self.stop :
             yr = self.stop
         else:
             yr = year
         return self.yrspars.loc[yr,'pu2']
     def pu3(self,year):
+        """
+        Return
+        ______
+        float
+            PAS UTILISÉ 
+        """
         if year > self.stop :
             yr = self.stop
         else:
             yr = year
         return self.yrspars.loc[yr,'pu3']
     def pu4(self,year):
+        """
+        Return
+        ______
+        float
+            PAS UTILISÉ 
+        """
         if year > self.stop :
             yr = self.stop
         else:
             yr = year
         return self.yrspars.loc[yr,'pu4']
     def supp(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            taux de bonification pour PRB sur régime de base 
+        """
         if year > self.stop :
             yr = self.stop
         else:
             yr = year
         return self.yrspars.loc[yr,'supp']
     def supp_s1(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            taux de bonification pour PRB sur régime supplémentaire 1
+        """
         if year > self.stop :
             yr = self.stop
         else:
             yr = year
         return self.yrspars.loc[yr,'supp_s1']
     def supp_s2(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            taux de bonification pour PRB sur régime supplémentaire 2
+        """
         if year > self.stop :
             yr = self.stop
         else:
             yr = year
         return self.yrspars.loc[yr,'supp_s2']
-    def survmax60(self,year):
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
-        return self.yrspars.loc[yr,'survmax60']
-    def survmax65(self,year):
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
+    # def survmax60(self,year):
+        
+    #     if year > self.stop :
+    #         yr = self.stop
+    #     else:
+    #         yr = year
+    #     return self.yrspars.loc[yr,'survmax60']
+    # def survmax65(self,year):
+    #     if year > self.stop :
+    #         yr = self.stop
+    #     else:
+    #         yr = year
 
-        return self.yrspars.loc[yr,'survmax65']
-    def survage1(self,year):
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
-        return self.yrspars.loc[yr,'survage1']
-    def survage2(self,year):
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
-        return self.yrspars.loc[yr,'survage2']
-    def survrate1(self,year):
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
-        return self.yrspars.loc[yr,'survrate1']
-    def survrate2(self,year):
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
-        return self.yrspars.loc[yr,'survrate2']
+    #     return self.yrspars.loc[yr,'survmax65']
+    # def survage1(self,year):
+    #     if year > self.stop :
+    #         yr = self.stop
+    #     else:
+    #         yr = year
+    #     return self.yrspars.loc[yr,'survage1']
+    # def survage2(self,year):
+    #     if year > self.stop :
+    #         yr = self.stop
+    #     else:
+    #         yr = year
+    #     return self.yrspars.loc[yr,'survage2']
+    # def survrate1(self,year):
+    #     if year > self.stop :
+    #         yr = self.stop
+    #     else:
+    #         yr = year
+    #     return self.yrspars.loc[yr,'survrate1']
+    # def survrate2(self,year):
+    #     if year > self.stop :
+    #         yr = self.stop
+    #     else:
+    #         yr = year
+    #     return self.yrspars.loc[yr,'survrate2']
     def era(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            age minimum pour claimer 
+        """
         if year > self.stop :
             yr = self.stop
         else:
             yr = year
         return self.yrspars.loc[yr,'era']
     def nra(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            age "standard" 
+        """
         if year > self.stop :
             yr = self.stop
         else:
             yr = year
         return self.yrspars.loc[yr,'nra']
     def disab_rate(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            taux pour disability 
+        """
         if year > self.stop :
             yr = self.stop
         else:
             yr = year
         return self.yrspars.loc[yr,'disab_rate']
     def disab_base(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            Montant pour disability
+        """
         if year > self.stop :
             yr = self.stop
         else:
             yr = year
         return self.yrspars.loc[yr,'disab_base']
     def cola(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        Return
+        ______
+        float
+            taux d'indexation du YMPE
+        """
         if year > self.stop :
             value  = self.cpi
         else:
             value = self.yrspars.loc[year,'cola']
         return value
     def gIndexation(self,start,stop):
+        """
+        calcule l'indexation pour une période définie par (start,stop)
+
+        Parameters
+        __________
+        start : int
+            première année d'indexation
+        stop : int
+            dernière année d'indexation
+ 
+        Return
+        ______
+        float
+            indexation
+        """
         return self.indexation[start-self.start][stop-self.start]
     def max_benefit(self,year):
+        """
+        Parameters
+        __________
+        year : int
+            Année du paramètre
+        calcule le benefice maximum éligible à une année (moyenne du YMPE des 5 dernière année )
+        Return
+        ______
+        float
+            
+        """
         return np.mean([self.ympe(x) for x in [max(year-x,1966) for x in range(5)]])*self.reprate(year)/12
-    def chgpar(self,name,y0,y1,value):
-        if (name in self.yrspars.columns):
-            for i in range(y0,y1+1):
-                self.yrspars.loc[i,name] = value
-        else :
-            for i in range(y0,y1+1):
-                pass
-                #self.byrpars.loc[i,name] = value
+    # def chgpar(self,name,y0,y1,value):
+    #     """
+    #     Ne pas utiliser
+    #     """
+    #     if (name in self.yrspars.columns):
+    #         for i in range(y0,y1+1):
+    #             self.yrspars.loc[i,name] = value
+    #     else :
+    #         for i in range(y0,y1+1):
+    #             pass
+    #             #self.byrpars.loc[i,name] = value
 
 class account:
     """
@@ -415,7 +736,6 @@ class account:
         année de naissance
     rules : rules
         une instance de la classe rules.
-    
     
     """
     def __init__(self,byear,rules=None):
@@ -439,6 +759,22 @@ class account:
         self.cqppcontrib = 0.0
 
     def MakeContrib(self,year,earn,earn_aut=0,kids=False):
+        """
+        Ajoute une année de contribution (une instance de record dans la list des années de contribution)
+
+        Parameters
+        __________
+        year : int
+            année de contribution
+        earn : float
+            revenue d'emploi cotisable
+        earn_aut : float
+            revenue autonome cotisable
+        kids : boolean
+        enfants de moins de 7  True seulemet pour la personne admissible à l'exemption pour enfants
+        
+        
+        """
         if year>=self.rules.start:
             if earn>=self.rules.ympe(year):
                 taxable = self.rules.ympe(year)-self.rules.exempt(year)
@@ -486,6 +822,14 @@ class account:
                 self.CalcPRB(year,taxable,taxable_s2,earn)
             
     def ClaimCPP(self,year):
+        """
+        Effectue le claiming, appelle CalcAMPE() et CalcBenefit()
+
+        Parameters
+        __________
+        year : int
+            année de contribution
+        """
         currage = self.gAge(year)
         if self.claimage!=None:
            print('already claimed at ',self.claimage,' ...')
@@ -502,10 +846,44 @@ class account:
             else :
                 print('not yet eligible...')
     def gAge(self,year):
+        """
+        Retourne l'âge de l'individu à une année donné.
+
+        Parameters
+        __________
+        year : int
+            année
+        
+        Return
+        ______
+        int
+
+        """
         return year - self.byear
     def gYear(self,age):
+        """
+        Retourne l'année pour un âge donné.
+
+        Parameters
+        __________
+        year : int
+            Âge
+        
+        Return
+        ______
+        int
+
+        """
         return self.byear + age
     def CalcAMPE(self,year):
+        """
+        Calcule le AMPE
+
+        Parameters
+        __________
+        year : int
+            année de claiming
+        """
         # parameters
         yr18 = np.max([self.gYear(18),self.rules.start])
         yr70 = np.min([self.gYear(70),year])
@@ -623,6 +1001,14 @@ class account:
         self.ampe_s2 = (1/12)*np.sum(ape_s2)/40
 
     def CalcBenefit(self,year):
+        """
+        Calcule le benefice (base,supp 1 et supp 2). Appellé après CalcAMPE()
+
+        Parameters
+        __________
+        year : int
+            année de claiming
+        """
         if self.receiving==True:
             if (self.gAge(year)==self.claimage):
                 nra = self.rules.nra(year)
@@ -647,6 +1033,19 @@ class account:
             self.benefit_s1 = 0.0
             self.benefit_s2 = 0.0
     def CalcPRB(self,year,taxable,taxable_s2,earn):
+        """
+        Calcule le Post retirement benefice quand une contribution est faite après avoir claimer.
+        Appelé par MakeContrib() qui calcule les paramêtres
+
+        Parameters
+        __________
+        year : int
+            année de la contribution
+        taxable : float
+            montant cotisable pour régime de base et supplémentaire 1
+        taxable_s2 : float
+            montant cotisable pour régime supplémentaire 2
+        """
         if self.rules.qpp:
             if year>=2014:
                 self.prb[self.gAge(year)-60+1] = (self.prb[self.gAge(year)-60]*(1+self.rules.cola(year))
@@ -693,24 +1092,72 @@ class account:
                         self.prb_s1[index] = self.prb_s1[index-1]*(1+self.rules.cola(year+index))
                         self.prb_s2[index] = self.prb_s2[index-1]*(1+self.rules.cola(year+index))
     def gBenefit(self,year):
+        """
+        Retourne le montant du bénéfice du régime de base à une année donnée 
+
+        Parameters
+        __________
+        year : int
+            Année du bénéfice
+        Return
+        ______
+        float
+            bénéfice
+        """
         if self.claimage :
             claimyear = self.gYear(self.claimage)
             return self.benefit * self.rules.gIndexation(claimyear,year)
         else :
             return self.benefit
     def gBenefit_s1(self,year):
+        """
+        Retourne le montant du bénéfice du régime supplémentaire 1à une année donnée 
+
+        Parameters
+        __________
+        year : int
+            Année du bénéfice
+        Return
+        ______
+        float
+            bénéfice
+        """
         if self.claimage :
             claimyear = self.gYear(self.claimage)
             return self.benefit_s1 * self.rules.gIndexation(claimyear,year)
         else :
             return self.benefit_s1
     def gBenefit_s2(self,year):
+        """
+        Retourne le montant du bénéfice du régime supplémentaire 2 à une année donnée 
+
+        Parameters
+        __________
+        year : int
+            Année du bénéfice
+        Return
+        ______
+        float
+            bénéfice
+        """
         if self.claimage :
             claimyear = self.gYear(self.claimage)
             return self.benefit_s2 * self.rules.gIndexation(claimyear,year)
         else :
             return self.benefit_s2
     def gPRB(self,year):
+        """
+        Retourne le montant du PRB du régime de base à une année donnée 
+
+        Parameters
+        __________
+        year : int
+            Année du PRB
+        Return
+        ______
+        float
+            montant PRB
+        """
         if self.gAge(year)<60 : 
             return 0.0
         elif  self.gAge(year)<self.gAge(year)<=70:
@@ -718,6 +1165,18 @@ class account:
         else :
             return self.prb[10]*self.rules.gIndexation(self.gYear(70),year)
     def gPRB_s1(self,year):
+        """
+        Retourne le montant du PRB du régime supplémentaire 1 à une année donnée 
+
+        Parameters
+        __________
+        year : int
+            Année du PRB
+        Return
+        ______
+        float
+            montant PRB
+        """
         if self.gAge(year)<60 : 
             return 0.0
         elif  self.gAge(year)<self.gAge(year)<=70:
@@ -725,6 +1184,18 @@ class account:
         else :
             return self.prb_s1[10]*self.rules.gIndexation(self.gYear(70),year)    
     def gPRB_s2(self,year):
+        """
+        Retourne le montant du PRB du régime supplémentaire 2 à une année donnée 
+
+        Parameters
+        __________
+        year : int
+            Année du PRB
+        Return
+        ______
+        float
+            montant PRB
+        """
         if self.gAge(year)<60 : 
             return 0.0
         elif  self.gAge(year)<self.gAge(year)<=70:
@@ -782,6 +1253,9 @@ class account:
 
 
     def ResetCase(self):
+        """
+        Reset un account
+        """
         self.claimage = None
         self.history = [record(yr) for yr in range(self.byear+18,self.byear+70,1)]
         self.ncontrib = 0
