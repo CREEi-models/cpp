@@ -1,4 +1,4 @@
-Documentation des fonctions de SRP
+Documentation des fonctions du SRPP
 =====================================
 
 .. currentmodule:: srpp
@@ -9,6 +9,5 @@ Documentation des fonctions de SRP
 
 .. autoclass:: account
     :members: MakeContrib, ClaimCPP, gAge, gYear, CalcAMPE, CalcBenefit,
-              CalcPRB, gBenefit, gBenefit_s1, gBenefit_s2, gPRB, gPRB_s1, 
+              CalcPRB, gBenefit, gBenefit_s1, gBenefit_s2, gPRB, gPRB_s1,
               gPRB_s2, ResetCase
-  
