@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Premier pas avec le SRP &mdash; Documentation Simulateur de régime de pension publique (SRP) 0.1</title>
+  <title>Premiers pas avec le SRPP &mdash; Documentation Simulateur de régime de pension publique (SRP) 0.1</title>
   
 
   
@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Recherche" href="search.html" />
     <link rel="next" title="Documentation des fonctions de SRP" href="code.html" />
-    <link rel="prev" title="Simulateur de régime de pension publique (SRP)" href="index.html" /> 
+    <link rel="prev" title="Simulateur de revenu de pensions publiques (SRPP)" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -83,11 +83,12 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Premier pas avec le SRP</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Premiers pas avec le SRPP</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation-du-srpp">Installation du SRPP</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="code.html">Documentation des fonctions de SRP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">Contacts et utilisation</a></li>
 </ul>
 
             
@@ -133,7 +134,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Premier pas avec le SRP</li>
+      <li>Premiers pas avec le SRPP</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -152,29 +153,27 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="premier-pas-avec-le-srp">
-<span id="overview"></span><h1>Premier pas avec le SRP<a class="headerlink" href="#premier-pas-avec-le-srp" title="Lien permanent vers ce titre">¶</a></h1>
+  <div class="section" id="premiers-pas-avec-le-srpp">
+<span id="overview"></span><h1>Premiers pas avec le SRPP<a class="headerlink" href="#premiers-pas-avec-le-srpp" title="Lien permanent vers ce titre">¶</a></h1>
 <div class="section" id="installation-du-srpp">
 <span id="installing-docdir"></span><h2>Installation du SRPP<a class="headerlink" href="#installation-du-srpp" title="Lien permanent vers ce titre">¶</a></h2>
-<dl class="simple">
-<dt>On peut installer facilement le SRP à l’aide de pip ::</dt><dd><p>pip install git+https://github.com/CREEi-models/cpp.git</p>
-</dd>
-</dl>
+<p>On peut installer facilement le SRP à l’aide de pip</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">srpp</span>
+</pre></div>
+</div>
 <p>Dans un notebook ou un projet, on invoque srpp en ajoutant la commande suivante:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">srp</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">srpp</span>
 </pre></div>
 </div>
-<p>Pour l’installer afin de le modifier il faut d’abord aller le chercher sur github</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">creei</span><span class="o">-</span><span class="n">models</span><span class="o">/</span><span class="n">cpp</span>
+<p>Pour l’installer afin de le modifier il faut d’abord aller le chercher sur Github</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">creei</span><span class="o">-</span><span class="n">models</span><span class="o">/</span><span class="n">srpp</span>
 </pre></div>
 </div>
-<p>Ensuite on peut l’installer en allant dans srp/ et en lancant au terminal</p>
+<p>Ensuite on peut l’installer en allant dans srp/ et en lançant au terminal</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span>
 </pre></div>
 </div>
-<p>les modification apporter affecterons directement le fichier installer. Il est
-fortement recommandé de procéder à l’installation de développement dans un environement
-(p.e. <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">conda environement</a>)</p>
+<p>Les modifications apportées affecteront directement le fichier installé. Il est fortement recommandé de procéder à l’installation de développement dans un environnement (p.ex. <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">conda environement</a>)</p>
 </div>
 </div>
 
@@ -189,7 +188,7 @@ fortement recommandé de procéder à l’installation de développement dans un
         <a href="code.html" class="btn btn-neutral float-right" title="Documentation des fonctions de SRP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="Simulateur de régime de pension publique (SRP)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Simulateur de revenu de pensions publiques (SRPP)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

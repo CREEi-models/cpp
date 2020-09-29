@@ -3,25 +3,21 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Simulateur de régime de pension publique (SRP)
+Simulateur de revenu de pensions publiques (SRPP)
 ==================================================================================
 
-Le simulateur de régime de pension publique (SRP) simule le Régime des rente du Québec(RRQ) ainsi 
-que le régime de pension du Canada. Le simulateur a été mis au point par l'équipe de la 
-`chaire sur les enjeux économiques intergénérationels <https://www.creei.ca>`_, 
-une chaire conjointe HEC Montréal et ESG UQAM. 
+Le Simulateur de revenu de pensions publiques (SRPP) simule le Régime de rentes du Québec (RRQ) ainsi que le Régime de pensions du Canada (RPC). Le simulateur a été mis au point par l'équipe de `l'Institut sur la retraite et l'épargne <https://ire.hec.ca>`_ à `HEC Montréal <https://www.hec.ca>`_.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
-   
+
    overview.rst
    code.rst
+   credits.rst
 
 
 Index et tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

@@ -400,10 +400,12 @@ class rules:
         return value
     def reprate(self,year):
         """
-         Parameters
+        
+        Parameters
         __________
         year : int
             Année du paramètre
+            
         Return
         ______
         float

@@ -1,8 +1,8 @@
 .. _overview:
 
-***********************
-Premier pas avec le SRP
-***********************
+*************************
+Premiers pas avec le SRPP
+*************************
 
 .. _installing-docdir:
 
@@ -10,24 +10,23 @@ Installation du SRPP
 ====================
 
 On peut installer facilement le SRP à l'aide de pip ::
-  pip install git+https://github.com/CREEi-models/cpp.git
+
+  pip install srpp
 
 Dans un notebook ou un projet, on invoque srpp en ajoutant la commande suivante:
 
 .. code:: ipython3
 
-    import srp
+    import srpp
 
 
-Pour l'installer afin de le modifier il faut d'abord aller le chercher sur github ::
+Pour l'installer afin de le modifier il faut d'abord aller le chercher sur Github ::
 
-  git clone https://github.com/creei-models/cpp
+  git clone https://github.com/creei-models/srpp
 
 
-Ensuite on peut l'installer en allant dans srp/ et en lancant au terminal ::
+Ensuite on peut l'installer en allant dans srp/ et en lançant au terminal ::
 
   python setup.py install -e
 
-les modification apporter affecterons directement le fichier installer. Il est 
-fortement recommandé de procéder à l'installation de développement dans un environement
-(p.e. `conda environement <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_) 
+Les modifications apportées affecteront directement le fichier installé. Il est fortement recommandé de procéder à l'installation de développement dans un environnement (p.ex. `conda environement <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_)
