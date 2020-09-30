@@ -22,6 +22,12 @@ class record:
         cotisation au régime supplémentaire 1 (en lien avec la hausse du taux de remplacement)
     contrib_s2 : float
         cotisation au régime supplémentaire 2 (en lien avec la hausse du salaire admissible à 114% du MGA pré-réforme)
+    contrib_aut : float
+        cotisation au régime de base pour les revenus de travail autonome
+    contrib_aut_s1 : float
+        cotisation au régime supplémentaire 1 (en lien avec la hausse du taux de remplacement) pour les revenus de travail autonome
+    contrib_aut_s2 : float
+        cotisation au régime supplémentaire 2 (en lien avec la hausse du salaire admissible à 114% du MGA pré-réforme) pour les revenus de travail autonome
     kids : boolean
         présence d'enfants de moins de 7 ans (True seulement pour la personne admissible à l'exemption pour soins aux enfants en bas âge); défaut=False
     disab : boolean
@@ -432,6 +438,8 @@ class rules:
         return value
     def nympe(self,year):
         """
+        Nombre d'années utilisé pour calculer le MGA moyen.
+
         Parameters
         __________
         year : int
@@ -439,7 +447,7 @@ class rules:
         Return
         ______
         float
-            nombre d'année pour calculé ympe moyen
+            Nombre d'années.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'nympe']
@@ -448,16 +456,16 @@ class rules:
         return value
     def reprate(self,year):
         """
+        Taux de remplacement du régime de base.
 
         Parameters
         __________
         year : int
             année du paramètre
-
         Return
         ______
         float
-            taux de remplacement régime de base
+            Taux de remplacement.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'reprate']
@@ -466,6 +474,8 @@ class rules:
         return value
     def reprate_s1(self,year):
         """
+        Taux de remplacement du régime supplémentaire 1.
+
         Parameters
         __________
         year : int
@@ -473,7 +483,7 @@ class rules:
         Return
         ______
         float
-            taux de remplacement régime supplémentaire 1
+            Taux de remplacement.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'reprate_s1']
@@ -482,6 +492,8 @@ class rules:
         return value
     def reprate_s2(self,year):
         """
+        Taux de remplacement du régime supplémentaire 2.
+
         Parameters
         __________
         year : int
@@ -489,7 +501,7 @@ class rules:
         Return
         ______
         float
-            taux de remplacement régime supplémentaire 1
+            Taux de remplacement.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'reprate_s2']
@@ -498,6 +510,8 @@ class rules:
         return value
     def droprate(self,year):
         """
+        Proportion d'années non prises en compte dans le calcul de la rente de retraite.
+
         Parameters
         __________
         year : int
@@ -505,7 +519,7 @@ class rules:
         Return
         ______
         float
-            taux d'année droppé
+            Proportion d'années.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'droprate']
@@ -566,6 +580,8 @@ class rules:
     #     return self.yrspars.loc[yr,'pu4']
     def supp(self,year):
         """
+        Taux de bonification post-retraite pour les bénéficiaires qui continuent de travailler tout en recevant une prestation de retraite (portion régime de base).
+
         Parameters
         __________
         year : int
@@ -573,7 +589,7 @@ class rules:
         Return
         ______
         float
-            taux de bonification pour PRB sur régime de base
+            Taux de bonification.
         """
         if year > self.stop :
             yr = self.stop
@@ -582,6 +598,8 @@ class rules:
         return self.yrspars.loc[yr,'supp']
     def supp_s1(self,year):
         """
+        Taux de bonification post-retraite pour les bénéficiaires qui continuent de travailler tout en recevant une prestation de retraite (portion régime supplémentaire 1).
+
         Parameters
         __________
         year : int
@@ -589,7 +607,7 @@ class rules:
         Return
         ______
         float
-            taux de bonification pour PRB sur régime supplémentaire 1
+            Taux de bonification.
         """
         if year > self.stop :
             yr = self.stop
@@ -598,6 +616,8 @@ class rules:
         return self.yrspars.loc[yr,'supp_s1']
     def supp_s2(self,year):
         """
+        Taux de bonification post-retraite pour les bénéficiaires qui continuent de travailler tout en recevant une prestation de retraite (portion régime supplémentaire 2).
+
         Parameters
         __________
         year : int
@@ -605,7 +625,7 @@ class rules:
         Return
         ______
         float
-            taux de bonification pour PRB sur régime supplémentaire 2
+            Taux de bonification.
         """
         if year > self.stop :
             yr = self.stop
@@ -652,6 +672,8 @@ class rules:
     #     return self.yrspars.loc[yr,'survrate2']
     def era(self,year):
         """
+        Âge minimum pour commencer à recevoir la rente de retraite (early retirement age).
+
         Parameters
         __________
         year : int
@@ -659,7 +681,7 @@ class rules:
         Return
         ______
         float
-            age minimum pour claimer
+            Âge minimum.
         """
         if year > self.stop :
             yr = self.stop
@@ -668,6 +690,8 @@ class rules:
         return self.yrspars.loc[yr,'era']
     def nra(self,year):
         """
+        Âge normal de la retraite.
+
         Parameters
         __________
         year : int
@@ -675,7 +699,7 @@ class rules:
         Return
         ______
         float
-            age "standard"
+            Âge normal.
         """
         if year > self.stop :
             yr = self.stop
@@ -684,6 +708,10 @@ class rules:
         return self.yrspars.loc[yr,'nra']
     def disab_rate(self,year):
         """
+        Taux pour prestation d'invalidité.
+
+        N'est pas utilisé actuellement.
+
         Parameters
         __________
         year : int
@@ -691,7 +719,7 @@ class rules:
         Return
         ______
         float
-            taux pour disability
+            Taux pour prestation d'invalidité.
         """
         if year > self.stop :
             yr = self.stop
@@ -700,6 +728,10 @@ class rules:
         return self.yrspars.loc[yr,'disab_rate']
     def disab_base(self,year):
         """
+        Montant pour prestation d'invalidité.
+
+        N'est pas utilisé actuellement.
+
         Parameters
         __________
         year : int
@@ -707,7 +739,7 @@ class rules:
         Return
         ______
         float
-            Montant pour disability
+            Montant de prestation d'invalidité.
         """
         if year > self.stop :
             yr = self.stop
@@ -716,6 +748,8 @@ class rules:
         return self.yrspars.loc[yr,'disab_base']
     def cola(self,year):
         """
+        Taux annuel d'indexation des prestations une fois que celles-ci ont débuté.
+
         Parameters
         __________
         year : int
@@ -723,7 +757,7 @@ class rules:
         Return
         ______
         float
-            taux d'indexation du YMPE
+            Taux d'indexation.
         """
         if year > self.stop :
             value  = self.cpi
@@ -732,7 +766,7 @@ class rules:
         return value
     def gIndexation(self,start,stop):
         """
-        calcule l'indexation pour une période définie par (start,stop)
+        Calcule l'indexation des prestations pour une période définie par (start,stop).
 
         Parameters
         __________
@@ -744,20 +778,23 @@ class rules:
         Return
         ______
         float
-            indexation
+            Indexation.
         """
         return self.indexation[start-self.start][stop-self.start]
     def max_benefit(self,year):
         """
+        Calcul de la prestation maximale possible pour une année donnée de début des prestations (moyenne du MGA des 5 années précédentes)
+
+        Utilisé aux fins du calcul de la réduction ajustée en fonction du revenu dans le RRQ (pour les individus débutant hâtivement leur rente de retraite).
+
         Parameters
         __________
         year : int
             année du paramètre
-        calcule le benefice maximum éligible à une année (moyenne du YMPE des 5 dernière année )
         Return
         ______
         float
-
+            Prestation maximale.
         """
         return np.mean([self.ympe(x) for x in [max(year-x,1966) for x in range(5)]])*self.reprate(year)/12
     # def chgpar(self,name,y0,y1,value):
@@ -774,18 +811,16 @@ class rules:
 
 class account:
     """
-    Classe principal regroupant l'information sur un individu et comprenant les
-    fonctions de calcul.
+    Classe principale regroupant l'information sur un individu et comprenant les fonctions de calcul.
 
-    Principal interface avec le simulateur. Chaque individu simulé doit avoir une
-    instance de classe.
+    Principale interface avec le simulateur. Chaque individu simulé doit avoir une instance de cette classe.
 
     Parameters
     __________
     byear : int
         année de naissance
     rules : rules
-        une instance de la classe rules.
+        une instance de la classe rules
 
     """
     def __init__(self,byear,rules=None):
@@ -810,20 +845,18 @@ class account:
 
     def MakeContrib(self,year,earn,earn_aut=0,kids=False):
         """
-        Ajoute une année de cotisation (une instance de record dans la list des années de cotisation)
+        Ajoute une année de cotisation (une instance de la classe *record* dans la liste des années de cotisation).
 
         Parameters
         __________
         year : int
             année de cotisation
         earn : float
-            revenue d'emploi cotisable
+            revenu d'emploi cotisable
         earn_aut : float
-            revenue autonome cotisable
+            revenu de travail autonome cotisable; défaut=0
         kids : boolean
-        enfants de moins de 7  True seulemet pour la personne admissible à l'exemption pour enfants
-
-
+            présence d'enfants de moins de 7 ans (True seulement pour la personne admissible à l'exemption pour soins aux enfants en bas âge); défaut=False
         """
         if year>=self.rules.start:
             if earn>=self.rules.ympe(year):
@@ -873,7 +906,7 @@ class account:
 
     def ClaimCPP(self,year):
         """
-        Effectue le claiming, appelle CalcAMPE() et CalcBenefit()
+        Effectue la demande de débuter les prestations et appelle les fonctions *CalcAMPE* et *CalcBenefit* (voir plus bas).
 
         Parameters
         __________
@@ -897,17 +930,16 @@ class account:
                 print('not yet eligible...')
     def gAge(self,year):
         """
-        Retourne l'âge de l'individu à une année donné.
+        Retourne l'âge de l'individu dans une année donnée.
 
         Parameters
         __________
         year : int
             année
-
         Return
         ______
         int
-
+            Âge.
         """
         return year - self.byear
     def gYear(self,age):
@@ -918,21 +950,20 @@ class account:
         __________
         year : int
             Âge
-
         Return
         ______
         int
-
+            Année.
         """
         return self.byear + age
     def CalcAMPE(self,year):
         """
-        Calcule le AMPE
+        Calcule la moyenne des gains ouvrant droit à pension, en proportion du MGA de chaque année, en tenant des années d'exclusion.
 
         Parameters
         __________
         year : int
-            année de claiming
+            année de début des prestations
         """
         # parameters
         yr18 = np.max([self.gYear(18),self.rules.start])
@@ -1052,12 +1083,12 @@ class account:
 
     def CalcBenefit(self,year):
         """
-        Calcule le benefice (base,supp 1 et supp 2). Appellé après CalcAMPE()
+        Calcule la prestation de retraite (régimes de base, supplémentaire 1 et supplémentaire 2), à partir de *CalcAMPE* et de nombreuses autres fonctions.
 
         Parameters
         __________
         year : int
-            année de claiming
+            année de début des prestations
         """
         if self.receiving==True:
             if (self.gAge(year)==self.claimage):
@@ -1084,17 +1115,18 @@ class account:
             self.benefit_s2 = 0.0
     def CalcPRB(self,year,taxable,taxable_s2,earn):
         """
-        Calcule le Post retirement benefice quand une cotisation est faite après avoir claimer.
-        Appelé par MakeContrib() qui calcule les paramêtres
+        Calcule la prestation post-retraite lorsqu'une cotisation a été faite après le début des prestations.
 
         Parameters
         __________
         year : int
             année de la cotisation
         taxable : float
-            montant cotisable pour régime de base et supplémentaire 1
+            montant cotisable pour le régime de base et le régime supplémentaire 1
         taxable_s2 : float
-            montant cotisable pour régime supplémentaire 2
+            montant cotisable pour le régime supplémentaire 2
+        earn : float
+            gains admissibles dans l'année précédente
         """
         if self.rules.qpp:
             if year>=2014:
@@ -1143,7 +1175,7 @@ class account:
                         self.prb_s2[index] = self.prb_s2[index-1]*(1+self.rules.cola(year+index))
     def gBenefit(self,year):
         """
-        Retourne le montant de la prestation du régime de base à une année donnée
+        Retourne le montant de la prestation du régime de base pour une année donnée.
 
         Parameters
         __________
@@ -1152,7 +1184,7 @@ class account:
         Return
         ______
         float
-            bénéfice
+            Prestation.
         """
         if self.claimage :
             claimyear = self.gYear(self.claimage)
@@ -1161,7 +1193,7 @@ class account:
             return self.benefit
     def gBenefit_s1(self,year):
         """
-        Retourne le montant de la prestation du régime supplémentaire 1à une année donnée
+        Retourne le montant de la prestation du régime supplémentaire 1 pour une année donnée.
 
         Parameters
         __________
@@ -1170,7 +1202,7 @@ class account:
         Return
         ______
         float
-            bénéfice
+            Prestation.
         """
         if self.claimage :
             claimyear = self.gYear(self.claimage)
@@ -1179,7 +1211,7 @@ class account:
             return self.benefit_s1
     def gBenefit_s2(self,year):
         """
-        Retourne le montant de la prestation du régime supplémentaire 2 à une année donnée
+        Retourne le montant de la prestation du régime supplémentaire 2 pour une année donnée.
 
         Parameters
         __________
@@ -1188,7 +1220,7 @@ class account:
         Return
         ______
         float
-            bénéfice
+            Prestation.
         """
         if self.claimage :
             claimyear = self.gYear(self.claimage)
@@ -1197,16 +1229,16 @@ class account:
             return self.benefit_s2
     def gPRB(self,year):
         """
-        Retourne le montant du PRB du régime de base à une année donnée
+        Retourne le montant de la prestion post-retraite du régime de base pour une année donnée.
 
         Parameters
         __________
         year : int
-            année du PRB
+            année de la prestation
         Return
         ______
         float
-            montant PRB
+            Montant de la prestion post-retraite.
         """
         if self.gAge(year)<60 :
             return 0.0
@@ -1216,16 +1248,16 @@ class account:
             return self.prb[10]*self.rules.gIndexation(self.gYear(70),year)
     def gPRB_s1(self,year):
         """
-        Retourne le montant du PRB du régime supplémentaire 1 à une année donnée
+        Retourne le montant de la prestion post-retraite du régime supplémentaire 1 pour une année donnée.
 
         Parameters
         __________
         year : int
-            année du PRB
+            année de la prestation
         Return
         ______
         float
-            montant PRB
+            Montant de la prestion post-retraite.
         """
         if self.gAge(year)<60 :
             return 0.0
@@ -1235,16 +1267,16 @@ class account:
             return self.prb_s1[10]*self.rules.gIndexation(self.gYear(70),year)
     def gPRB_s2(self,year):
         """
-        Retourne le montant du PRB du régime supplémentaire 2 à une année donnée
+        Retourne le montant de la prestion post-retraite du régime supplémentaire 2 pour une année donnée.
 
         Parameters
         __________
         year : int
-            année du PRB
+            année de la prestation
         Return
         ______
         float
-            montant PRB
+            Montant de la prestion post-retraite.
         """
         if self.gAge(year)<60 :
             return 0.0
@@ -1304,7 +1336,7 @@ class account:
 
     def ResetCase(self):
         """
-        Reset un account
+        Réinitialise l'instance de la classe *account*.
         """
         self.claimage = None
         self.history = [record(yr) for yr in range(self.byear+18,self.byear+70,1)]

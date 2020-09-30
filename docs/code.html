@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Documentation des fonctions du SRPP &mdash; Documentation Simulateur de régime de pension publique (SRPP) 0.1</title>
+  <title>Documentation des fonctions du SRPP &mdash; Documentation Simulateur de régimes de pensions publiques (SRPP) 0.1</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Simulateur de régime de pension publique (SRPP)
+            <a href="index.html" class="icon icon-home"> Simulateur de régimes de pensions publiques (SRPP)
           
 
           
@@ -82,7 +82,7 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption"><span class="caption-text">Menu:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Premiers pas avec le SRPP</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation des fonctions du SRPP</a></li>
@@ -103,7 +103,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Simulateur de régime de pension publique (SRPP)</a>
+          <a href="index.html">Simulateur de régimes de pensions publiques (SRPP)</a>
         
       </nav>
 
@@ -168,6 +168,9 @@
 <li><p><strong>contrib</strong> (<em>float</em>) – cotisation au régime de base</p></li>
 <li><p><strong>contrib_s1</strong> (<em>float</em>) – cotisation au régime supplémentaire 1 (en lien avec la hausse du taux de remplacement)</p></li>
 <li><p><strong>contrib_s2</strong> (<em>float</em>) – cotisation au régime supplémentaire 2 (en lien avec la hausse du salaire admissible à 114% du MGA pré-réforme)</p></li>
+<li><p><strong>contrib_aut</strong> (<em>float</em>) – cotisation au régime de base pour les revenus de travail autonome</p></li>
+<li><p><strong>contrib_aut_s1</strong> (<em>float</em>) – cotisation au régime supplémentaire 1 (en lien avec la hausse du taux de remplacement) pour les revenus de travail autonome</p></li>
+<li><p><strong>contrib_aut_s2</strong> (<em>float</em>) – cotisation au régime supplémentaire 2 (en lien avec la hausse du salaire admissible à 114% du MGA pré-réforme) pour les revenus de travail autonome</p></li>
 <li><p><strong>kids</strong> (<em>boolean</em>) – présence d’enfants de moins de 7 ans (True seulement pour la personne admissible à l’exemption pour soins aux enfants en bas âge); défaut=False</p></li>
 <li><p><strong>disab</strong> (<em>boolean</em>) – rente d’invalidité (non modélisée actuellement) si True, rente de retraite si False; défaut=False</p></li>
 </ul>
@@ -190,7 +193,7 @@
 <li><p><strong>cpi</strong> (<em>float</em>) – taux annuel d’indexation des prestations</p></li>
 <li><p><strong>wgr</strong> (<em>float</em>) – taux annuel d’augmentation du MGA</p></li>
 <li><p><strong>lastyear</strong> (<em>int</em>) – lastyear + 1: année à partir de laquelle <em>rules.cpi</em> et <em>rules.wgr</em> sont utilisés à la place des valeurs du fichier de paramètres</p></li>
-<li><p><strong>self.indexation</strong> (<em>float</em><em>(</em><em>NxN</em><em>)</em>) – tableau pré-calculé d’indexation de 1966 à 2100</p></li>
+<li><p><strong>self.indexation</strong> (<em>float</em><em>(</em><em>NxN</em><em>)</em>) – tableau pré-calculé d’indexation des prestations de 1966 à 2100</p></li>
 </ul>
 </dd>
 </dl>
@@ -226,8 +229,8 @@
 <dl class="method">
 <dt id="srpp.rules.exempt">
 <code class="sig-name descname">exempt</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.exempt" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Montant de l’exemption.</p>
-<p>Fixe après 2025.</p>
+<dd><p>Montant de l’exemption sur les gains cotisables.</p>
+<p>Après 2025, maintenue fixe à sa valeur nominale de 2025.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
@@ -328,48 +331,6 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="srpp.rules.tax">
-<code class="sig-name descname">tax</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.tax" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Taux de cotisation combiné de l’employeur et de l’employé au régime de base.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
-</dd>
-<dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="srpp.rules.tax_s1">
-<code class="sig-name descname">tax_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.tax_s1" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Taux de cotisation combiné de l’employeur et de l’employé au régime supplémentaire 1.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
-</dd>
-<dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="srpp.rules.tax_s2">
-<code class="sig-name descname">tax_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.tax_s2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Taux de cotisation combiné de l’employeur et de l’employé au régime supplémentaire 2.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
-</dd>
-<dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
 <dt id="srpp.rules.selftax">
 <code class="sig-name descname">selftax</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.selftax" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><p>Taux de cotisation sur revenun de travail autonome au régime de base.</p>
@@ -456,12 +417,13 @@
 <dl class="method">
 <dt id="srpp.rules.nympe">
 <code class="sig-name descname">nympe</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.nympe" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Nombre d’années utilisé pour calculer le MGA moyen.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – nombre d’année pour calculé ympe moyen</p>
+<dd class="field-even"><p><em>float</em> – Nombre d’années.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -469,12 +431,13 @@
 <dl class="method">
 <dt id="srpp.rules.reprate">
 <code class="sig-name descname">reprate</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.reprate" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de remplacement du régime de base.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – taux de remplacement régime de base</p>
+<dd class="field-even"><p><em>float</em> – Taux de remplacement.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -482,12 +445,13 @@
 <dl class="method">
 <dt id="srpp.rules.reprate_s1">
 <code class="sig-name descname">reprate_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.reprate_s1" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de remplacement du régime supplémentaire 1.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – taux de remplacement régime supplémentaire 1</p>
+<dd class="field-even"><p><em>float</em> – Taux de remplacement.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -495,12 +459,13 @@
 <dl class="method">
 <dt id="srpp.rules.reprate_s2">
 <code class="sig-name descname">reprate_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.reprate_s2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de remplacement du régime supplémentaire 2.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – taux de remplacement régime supplémentaire 1</p>
+<dd class="field-even"><p><em>float</em> – Taux de remplacement.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -508,55 +473,13 @@
 <dl class="method">
 <dt id="srpp.rules.droprate">
 <code class="sig-name descname">droprate</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.droprate" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Proportion d’années non prises en compte dans le calcul de la rente de retraite.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – taux d’année droppé</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="srpp.rules.pu1">
-<code class="sig-name descname">pu1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.pu1" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
-</dd>
-<dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – PAS UTILISER</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="srpp.rules.pu2">
-<code class="sig-name descname">pu2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.pu2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Renvoie</dt>
-<dd class="field-odd"><p><em>float</em> – PAS UTILISER</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="srpp.rules.pu3">
-<code class="sig-name descname">pu3</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.pu3" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Renvoie</dt>
-<dd class="field-odd"><p><em>float</em> – PAS UTILISÉ</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="srpp.rules.pu4">
-<code class="sig-name descname">pu4</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.pu4" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Renvoie</dt>
-<dd class="field-odd"><p><em>float</em> – PAS UTILISÉ</p>
+<dd class="field-even"><p><em>float</em> – Proportion d’années.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -564,12 +487,13 @@
 <dl class="method">
 <dt id="srpp.rules.supp">
 <code class="sig-name descname">supp</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.supp" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de bonification post-retraite pour les bénéficiaires qui continuent de travailler tout en recevant une prestation de retraite (portion régime de base).</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – taux de bonification pour PRB sur régime de base</p>
+<dd class="field-even"><p><em>float</em> – Taux de bonification.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -577,12 +501,13 @@
 <dl class="method">
 <dt id="srpp.rules.supp_s1">
 <code class="sig-name descname">supp_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.supp_s1" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de bonification post-retraite pour les bénéficiaires qui continuent de travailler tout en recevant une prestation de retraite (portion régime supplémentaire 1).</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – taux de bonification pour PRB sur régime supplémentaire 1</p>
+<dd class="field-even"><p><em>float</em> – Taux de bonification.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -590,12 +515,13 @@
 <dl class="method">
 <dt id="srpp.rules.supp_s2">
 <code class="sig-name descname">supp_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.supp_s2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de bonification post-retraite pour les bénéficiaires qui continuent de travailler tout en recevant une prestation de retraite (portion régime supplémentaire 2).</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – taux de bonification pour PRB sur régime supplémentaire 2</p>
+<dd class="field-even"><p><em>float</em> – Taux de bonification.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -603,12 +529,13 @@
 <dl class="method">
 <dt id="srpp.rules.era">
 <code class="sig-name descname">era</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.era" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Âge minimum pour commencer à recevoir la rente de retraite (early retirement age).</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – age minimum pour claimer</p>
+<dd class="field-even"><p><em>float</em> – Âge minimum.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -616,12 +543,13 @@
 <dl class="method">
 <dt id="srpp.rules.nra">
 <code class="sig-name descname">nra</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.nra" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Âge normal de la retraite.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – age « standard »</p>
+<dd class="field-even"><p><em>float</em> – Âge normal.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -629,12 +557,14 @@
 <dl class="method">
 <dt id="srpp.rules.disab_rate">
 <code class="sig-name descname">disab_rate</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.disab_rate" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux pour prestation d’invalidité.</p>
+<p>N’est pas utilisé actuellement.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – taux pour disability</p>
+<dd class="field-even"><p><em>float</em> – Taux pour prestation d’invalidité.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -642,12 +572,14 @@
 <dl class="method">
 <dt id="srpp.rules.disab_base">
 <code class="sig-name descname">disab_base</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.disab_base" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Montant pour prestation d’invalidité.</p>
+<p>N’est pas utilisé actuellement.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Montant pour disability</p>
+<dd class="field-even"><p><em>float</em> – Montant de prestation d’invalidité.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -655,12 +587,13 @@
 <dl class="method">
 <dt id="srpp.rules.cola">
 <code class="sig-name descname">cola</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.cola" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux annuel d’indexation des prestations une fois que celles-ci ont débuté.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – taux d’indexation du YMPE</p>
+<dd class="field-even"><p><em>float</em> – Taux d’indexation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -668,7 +601,7 @@
 <dl class="method">
 <dt id="srpp.rules.gIndexation">
 <code class="sig-name descname">gIndexation</code><span class="sig-paren">(</span><em class="sig-param">start</em>, <em class="sig-param">stop</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.gIndexation" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>calcule l’indexation pour une période définie par (start,stop)</p>
+<dd><p>Calcule l’indexation des prestations pour une période définie par (start,stop).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><ul class="simple">
@@ -677,7 +610,7 @@
 </ul>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – indexation</p>
+<dd class="field-even"><p><em>float</em> – Indexation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -685,15 +618,14 @@
 <dl class="method">
 <dt id="srpp.rules.max_benefit">
 <code class="sig-name descname">max_benefit</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.max_benefit" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Calcul de la prestation maximale possible pour une année donnée de début des prestations (moyenne du MGA des 5 années précédentes)</p>
+<p>Utilisé aux fins du calcul de la réduction ajustée en fonction du revenu dans le RRQ (pour les individus débutant hâtivement leur rente de retraite).</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>year</strong> (<em>int</em>) – année du paramètre</p></li>
-<li><p><strong>le benefice maximum éligible à une année</strong><strong> (</strong><strong>moyenne du YMPE des 5 dernière année</strong><strong> )</strong> (<em>calcule</em>) – </p></li>
-</ul>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em></p>
+<dd class="field-even"><p><em>float</em> – Prestation maximale.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -703,30 +635,27 @@
 <dl class="class">
 <dt id="srpp.account">
 <em class="property">class </em><code class="sig-prename descclassname">srpp.</code><code class="sig-name descname">account</code><span class="sig-paren">(</span><em class="sig-param">byear</em>, <em class="sig-param">rules=None</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Classe principal regroupant l’information sur un individu et comprenant les
-fonctions de calcul.</p>
-<p>Principal interface avec le simulateur. Chaque individu simulé doit avoir une
-instance de classe.</p>
+<dd><p>Classe principale regroupant l’information sur un individu et comprenant les fonctions de calcul.</p>
+<p>Principale interface avec le simulateur. Chaque individu simulé doit avoir une instance de cette classe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>byear</strong> (<em>int</em>) – année de naissance</p></li>
-<li><p><strong>rules</strong> (<a class="reference internal" href="#srpp.rules" title="srpp.rules"><em>rules</em></a>) – une instance de la classe rules.</p></li>
+<li><p><strong>rules</strong> (<a class="reference internal" href="#srpp.rules" title="srpp.rules"><em>rules</em></a>) – une instance de la classe rules</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="method">
 <dt id="srpp.account.MakeContrib">
 <code class="sig-name descname">MakeContrib</code><span class="sig-paren">(</span><em class="sig-param">year</em>, <em class="sig-param">earn</em>, <em class="sig-param">earn_aut=0</em>, <em class="sig-param">kids=False</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.MakeContrib" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Ajoute une année de cotisation (une instance de record dans la list des années de cotisation)</p>
+<dd><p>Ajoute une année de cotisation (une instance de la classe <em>record</em> dans la liste des années de cotisation).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>year</strong> (<em>int</em>) – année de cotisation</p></li>
-<li><p><strong>earn</strong> (<em>float</em>) – revenue d’emploi cotisable</p></li>
-<li><p><strong>earn_aut</strong> (<em>float</em>) – revenue autonome cotisable</p></li>
-<li><p><strong>kids</strong> (<em>boolean</em>) – </p></li>
-<li><p><strong>de moins de 7  True seulemet pour la personne admissible à l'exemption pour enfants</strong> (<em>enfants</em>) – </p></li>
+<li><p><strong>earn</strong> (<em>float</em>) – revenu d’emploi cotisable</p></li>
+<li><p><strong>earn_aut</strong> (<em>float</em>) – revenu de travail autonome cotisable; défaut=0</p></li>
+<li><p><strong>kids</strong> (<em>boolean</em>) – présence d’enfants de moins de 7 ans (True seulement pour la personne admissible à l’exemption pour soins aux enfants en bas âge); défaut=False</p></li>
 </ul>
 </dd>
 </dl>
@@ -735,7 +664,7 @@ instance de classe.</p>
 <dl class="method">
 <dt id="srpp.account.ClaimCPP">
 <code class="sig-name descname">ClaimCPP</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.ClaimCPP" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Effectue le claiming, appelle CalcAMPE() et CalcBenefit()</p>
+<dd><p>Effectue la demande de débuter les prestations et appelle les fonctions <em>CalcAMPE</em> et <em>CalcBenefit</em> (voir plus bas).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de cotisation</p>
@@ -746,13 +675,13 @@ instance de classe.</p>
 <dl class="method">
 <dt id="srpp.account.gAge">
 <code class="sig-name descname">gAge</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.gAge" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Retourne l’âge de l’individu à une année donné.</p>
+<dd><p>Retourne l’âge de l’individu dans une année donnée.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>int</em></p>
+<dd class="field-even"><p><em>int</em> – Âge.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -766,7 +695,7 @@ instance de classe.</p>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Âge</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>int</em></p>
+<dd class="field-even"><p><em>int</em> – Année.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -774,10 +703,10 @@ instance de classe.</p>
 <dl class="method">
 <dt id="srpp.account.CalcAMPE">
 <code class="sig-name descname">CalcAMPE</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.CalcAMPE" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Calcule le AMPE</p>
+<dd><p>Calcule la moyenne des gains ouvrant droit à pension, en proportion du MGA de chaque année, en tenant des années d’exclusion.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de claiming</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de début des prestations</p>
 </dd>
 </dl>
 </dd></dl>
@@ -785,10 +714,10 @@ instance de classe.</p>
 <dl class="method">
 <dt id="srpp.account.CalcBenefit">
 <code class="sig-name descname">CalcBenefit</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.CalcBenefit" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Calcule le benefice (base,supp 1 et supp 2). Appellé après CalcAMPE()</p>
+<dd><p>Calcule la prestation de retraite (régimes de base, supplémentaire 1 et supplémentaire 2), à partir de <em>CalcAMPE</em> et de nombreuses autres fonctions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de claiming</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de début des prestations</p>
 </dd>
 </dl>
 </dd></dl>
@@ -796,14 +725,14 @@ instance de classe.</p>
 <dl class="method">
 <dt id="srpp.account.CalcPRB">
 <code class="sig-name descname">CalcPRB</code><span class="sig-paren">(</span><em class="sig-param">year</em>, <em class="sig-param">taxable</em>, <em class="sig-param">taxable_s2</em>, <em class="sig-param">earn</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.CalcPRB" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Calcule le Post retirement benefice quand une cotisation est faite après avoir claimer.
-Appelé par MakeContrib() qui calcule les paramêtres</p>
+<dd><p>Calcule la prestation post-retraite lorsqu’une cotisation a été faite après le début des prestations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>year</strong> (<em>int</em>) – année de la cotisation</p></li>
-<li><p><strong>taxable</strong> (<em>float</em>) – montant cotisable pour régime de base et supplémentaire 1</p></li>
-<li><p><strong>taxable_s2</strong> (<em>float</em>) – montant cotisable pour régime supplémentaire 2</p></li>
+<li><p><strong>taxable</strong> (<em>float</em>) – montant cotisable pour le régime de base et le régime supplémentaire 1</p></li>
+<li><p><strong>taxable_s2</strong> (<em>float</em>) – montant cotisable pour le régime supplémentaire 2</p></li>
+<li><p><strong>earn</strong> (<em>float</em>) – gains admissibles dans l’année précédente</p></li>
 </ul>
 </dd>
 </dl>
@@ -812,13 +741,13 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dl class="method">
 <dt id="srpp.account.gBenefit">
 <code class="sig-name descname">gBenefit</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.gBenefit" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Retourne le montant de la prestation du régime de base à une année donnée</p>
+<dd><p>Retourne le montant de la prestation du régime de base pour une année donnée.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de la prestation</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – bénéfice</p>
+<dd class="field-even"><p><em>float</em> – Prestation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -826,13 +755,13 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dl class="method">
 <dt id="srpp.account.gBenefit_s1">
 <code class="sig-name descname">gBenefit_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.gBenefit_s1" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Retourne le montant de la prestation du régime supplémentaire 1à une année donnée</p>
+<dd><p>Retourne le montant de la prestation du régime supplémentaire 1 pour une année donnée.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de la prestation</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – bénéfice</p>
+<dd class="field-even"><p><em>float</em> – Prestation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -840,13 +769,13 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dl class="method">
 <dt id="srpp.account.gBenefit_s2">
 <code class="sig-name descname">gBenefit_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.gBenefit_s2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Retourne le montant de la prestation du régime supplémentaire 2 à une année donnée</p>
+<dd><p>Retourne le montant de la prestation du régime supplémentaire 2 pour une année donnée.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de la prestation</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – bénéfice</p>
+<dd class="field-even"><p><em>float</em> – Prestation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -854,13 +783,13 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dl class="method">
 <dt id="srpp.account.gPRB">
 <code class="sig-name descname">gPRB</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.gPRB" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Retourne le montant du PRB du régime de base à une année donnée</p>
+<dd><p>Retourne le montant de la prestion post-retraite du régime de base pour une année donnée.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du PRB</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de la prestation</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – montant PRB</p>
+<dd class="field-even"><p><em>float</em> – Montant de la prestion post-retraite.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -868,13 +797,13 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dl class="method">
 <dt id="srpp.account.gPRB_s1">
 <code class="sig-name descname">gPRB_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.gPRB_s1" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Retourne le montant du PRB du régime supplémentaire 1 à une année donnée</p>
+<dd><p>Retourne le montant de la prestion post-retraite du régime supplémentaire 1 pour une année donnée.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du PRB</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de la prestation</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – montant PRB</p>
+<dd class="field-even"><p><em>float</em> – Montant de la prestion post-retraite.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -882,13 +811,13 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dl class="method">
 <dt id="srpp.account.gPRB_s2">
 <code class="sig-name descname">gPRB_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.gPRB_s2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Retourne le montant du PRB du régime supplémentaire 2 à une année donnée</p>
+<dd><p>Retourne le montant de la prestion post-retraite du régime supplémentaire 2 pour une année donnée.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du PRB</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de la prestation</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – montant PRB</p>
+<dd class="field-even"><p><em>float</em> – Montant de la prestion post-retraite.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -896,7 +825,7 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dl class="method">
 <dt id="srpp.account.ResetCase">
 <code class="sig-name descname">ResetCase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.ResetCase" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Reset un account</p>
+<dd><p>Réinitialise l’instance de la classe <em>account</em>.</p>
 </dd></dl>
 
 </dd></dl>

@@ -11,7 +11,7 @@ setuptools.setup(
     description="Module pour simuler prestations pensions publiques Canada",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/rsi-models/srpp",
+    url="https://creei-models.github.io/srpp/",
     packages=setuptools.find_packages(),
     include_package_data=True,
     classifiers=[
