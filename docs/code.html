@@ -76,6 +76,7 @@
 
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
+    
             
             
               
@@ -90,6 +91,8 @@
 
             
           
+    <a href="genindex.html">Index</a>
+  
         </div>
       </div>
     </nav>
@@ -163,10 +166,10 @@
 <li><p><strong>year</strong> (<em>int</em>) – année de l’entrée</p></li>
 <li><p><strong>earn</strong> (<em>float</em>) – gains admissibles</p></li>
 <li><p><strong>contrib</strong> (<em>float</em>) – cotisation au régime de base</p></li>
-<li><p><strong>contrib_s1</strong> (<em>float</em>) – costisation au régime supplémentaire 1 (en lien avec la hausse du taux de remplacement)</p></li>
-<li><p><strong>contrib_s2</strong> (<em>float</em>) – costisation au régime supplémentaire 2 (en lien avec la hausse du salaire admissible à 114% du MGA pré-réforme)</p></li>
-<li><p><strong>kids</strong> (<em>boolean</em>) – présence d’enfants de moins de 7 ans; True seulemet pour la personne admissible à l’exemption pour soins aux enfants en bas âge</p></li>
-<li><p><strong>disab</strong> (<em>boolean</em>) – rente d’invalidité (non modélisée actuellement)</p></li>
+<li><p><strong>contrib_s1</strong> (<em>float</em>) – cotisation au régime supplémentaire 1 (en lien avec la hausse du taux de remplacement)</p></li>
+<li><p><strong>contrib_s2</strong> (<em>float</em>) – cotisation au régime supplémentaire 2 (en lien avec la hausse du salaire admissible à 114% du MGA pré-réforme)</p></li>
+<li><p><strong>kids</strong> (<em>boolean</em>) – présence d’enfants de moins de 7 ans (True seulement pour la personne admissible à l’exemption pour soins aux enfants en bas âge); défaut=False</p></li>
+<li><p><strong>disab</strong> (<em>boolean</em>) – rente d’invalidité (non modélisée actuellement) si True, rente de retraite si False; défaut=False</p></li>
 </ul>
 </dd>
 </dl>
@@ -177,15 +180,16 @@
 <em class="property">class </em><code class="sig-prename descclassname">srpp.</code><code class="sig-name descname">rules</code><span class="sig-paren">(</span><em class="sig-param">qpp=False</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><p>Classe contenant les règles du RPC et du RRQ.</p>
 <p>Une instance de cette classe charge soit les pamamètres pour le RRQ (qpp=True) ou pour le RPC (qpp=False). Les paramètres jusqu’en 2025 sont dans params/qpp_history.xlsx et params/cpp_history.xlsx. Passé 2025 les différentes fonctions de méthodes renvoient soit la valeur de 2025 ou la valeur actualisée, selon le paramètre. En général, pour accéder à un paramètre pour une année donnée il suffit d’appeler la fonction de méthode <em>rules.&lt;param&gt;(year)</em>.</p>
+<p>On note que tous les taux de cotisation sont modélisés séparément, car les différentes composantes des cotisations sont traitées de façon différente sur le plan fiscal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>qpp</strong> (<em>boolean</em>) – True pour charger les paramètres du RRQ, False pour charger ceux du RPC</p>
+<dd class="field-odd"><p><strong>qpp</strong> (<em>boolean</em>) – True pour charger les paramètres du RRQ, False pour charger ceux du RPC; défaut=True</p>
 </dd>
 <dt class="field-even">Variables</dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>cpi</strong> (<em>float</em>) – taux annuel d’indexation des prestations</p></li>
 <li><p><strong>wgr</strong> (<em>float</em>) – taux annuel d’augmentation du MGA</p></li>
-<li><p><strong>lastyear</strong> (<em>int</em>) – lastyear + 1: année à partir de laquelle <em>rules.cpi</em> et <a href="#id1"><span class="problematic" id="id2">*</span></a>rules.wgr sont utilisés à la place des valeurs du fichier de paramètres</p></li>
+<li><p><strong>lastyear</strong> (<em>int</em>) – lastyear + 1: année à partir de laquelle <em>rules.cpi</em> et <em>rules.wgr</em> sont utilisés à la place des valeurs du fichier de paramètres</p></li>
 <li><p><strong>self.indexation</strong> (<em>float</em><em>(</em><em>NxN</em><em>)</em>) – tableau pré-calculé d’indexation de 1966 à 2100</p></li>
 </ul>
 </dd>
@@ -193,12 +197,14 @@
 <dl class="method">
 <dt id="srpp.rules.ympe">
 <code class="sig-name descname">ympe</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.ympe" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>MGA de base pour une année donnée.</p>
+<p>Par défaut, indexé à <em>wgr</em> pour les années après 2025.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – MGA pour une année donné. Indexé à wgr pour les années &gt; 2025</p>
+<dd class="field-even"><p><em>float</em> – Montant du MGA de base.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -206,13 +212,13 @@
 <dl class="method">
 <dt id="srpp.rules.ympe_s2">
 <code class="sig-name descname">ympe_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.ympe_s2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Montant du MGA pour le régime supplémentaire pour une année donnée (0 avant 2024, indexé à <em>wgr</em> après 2025).</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Montant du MGA pour le régime supplémentaire. 0 avant 2024.
-Indexé à wgr après 2025.</p>
+<dd class="field-even"><p><em>float</em> – Montant du MGA pour le régime supplémentaire.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -220,12 +226,14 @@ Indexé à wgr après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.exempt">
 <code class="sig-name descname">exempt</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.exempt" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Montant de l’exemption.</p>
+<p>Fixe après 2025.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Montant de l’exemption. Fixe après 2025.</p>
+<dd class="field-even"><p><em>float</em> – Montant de l’exemption.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -233,12 +241,13 @@ Indexé à wgr après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.worktax">
 <code class="sig-name descname">worktax</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.worktax" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de cotisation de l’employé au régime de base. Fixe après 2025.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de contribution de l’employé au régime de base. Fixe après 2025.</p>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -246,12 +255,14 @@ Indexé à wgr après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.worktax_s1">
 <code class="sig-name descname">worktax_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.worktax_s1" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de cotisation de l’employé au régime supplémentaire 1.</p>
+<p>Fixe après 2025.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de contribution de l’employé au régime supplémentaire 1. Fixe après 2025.</p>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -259,13 +270,14 @@ Indexé à wgr après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.worktax_s2">
 <code class="sig-name descname">worktax_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.worktax_s2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de cotisation de l’employé au régime supplémentaire 1.</p>
+<p>Fixe après 2025.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de contribution de l’employé au régime supplémentaire 2.
-Fixe après 2025.</p>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -273,12 +285,14 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.empltax">
 <code class="sig-name descname">empltax</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.empltax" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de cotisation de l’employeur au régime de base.</p>
+<p>Fixe après 2025.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de contribution de l’employeur au régime de base. Fixe après 2025.</p>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -286,12 +300,14 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.empltax_s1">
 <code class="sig-name descname">empltax_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.empltax_s1" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de cotisation de l’employeur au régime supplémentaire 1.</p>
+<p>Fixe après 2025.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de contribution de l’employeur au régime supplémentaire 1. Fixe après 2025.</p>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -299,13 +315,14 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.empltax_s2">
 <code class="sig-name descname">empltax_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.empltax_s2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de cotisation de l’employeur au régime supplémentaire 2.</p>
+<p>Fixe après 2025.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de contribution de l’employeur au régime supplémentaire 2.
-Fixe après 2025.</p>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -313,12 +330,13 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.tax">
 <code class="sig-name descname">tax</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.tax" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de cotisation combiné de l’employeur et de l’employé au régime de base.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de contribution de l’employeur et de l’employé au régime de base.</p>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -326,9 +344,13 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.tax_s1">
 <code class="sig-name descname">tax_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.tax_s1" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Renvoie</dt>
-<dd class="field-odd"><p><em>float</em> – Taux de contribution de l’employeur et de l’employé au régime supplémentaire 1.</p>
+<dd><p>Taux de cotisation combiné de l’employeur et de l’employé au régime supplémentaire 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres</dt>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
+</dd>
+<dt class="field-even">Renvoie</dt>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -336,12 +358,13 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.tax_s2">
 <code class="sig-name descname">tax_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.tax_s2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de cotisation combiné de l’employeur et de l’employé au régime supplémentaire 2.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de contribution de l’employeur et de l’employé au régime supplémentaire 2.</p>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -349,9 +372,13 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.selftax">
 <code class="sig-name descname">selftax</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.selftax" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Renvoie</dt>
-<dd class="field-odd"><p><em>float</em> – Taux de contribution sur revenun d’emploi (travailleur autonome)  au régime de base.</p>
+<dd><p>Taux de cotisation sur revenun de travail autonome au régime de base.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres</dt>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
+</dd>
+<dt class="field-even">Renvoie</dt>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -359,12 +386,13 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.selftax_s1">
 <code class="sig-name descname">selftax_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.selftax_s1" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de cotisation sur revenun de travail autonome au régime supplémentaire 1.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de contribution sur revenun d’emploi (travailleur autonome)  au régime supplémentaire 1.</p>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -372,12 +400,13 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.selftax_s2">
 <code class="sig-name descname">selftax_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.selftax_s2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de cotisation sur revenun de travail autonome au régime supplémentaire 2.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – Taux de contribution sur revenun d’emploi (travailleur autonome)  au régime supplémentaire 2.</p>
+<dd class="field-even"><p><em>float</em> – Taux de cotisation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -385,12 +414,13 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.ca">
 <code class="sig-name descname">ca</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.ca" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Dans le RRQ, facteur d’ajustement en fonction du revenu de la réduction pour rente hâtive (débutant avant 65 ans).</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – nouveau facteur d’ajustement de la pénalité en fonction du revenu pour RRQ</p>
+<dd class="field-even"><p><em>float</em> – Facteur d’ajustement.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -398,12 +428,13 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.arf">
 <code class="sig-name descname">arf</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.arf" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de réduction des prestations pour un début avant 65 ans.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – taux pénalité avant 65</p>
+<dd class="field-even"><p><em>float</em> – Taux de réduction.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -411,12 +442,13 @@ Fixe après 2025.</p>
 <dl class="method">
 <dt id="srpp.rules.drc">
 <code class="sig-name descname">drc</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.drc" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Taux de bonification des prestations pour un début après 65 ans.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
-<dd class="field-even"><p><em>float</em> – taux bonification après 65</p>
+<dd class="field-even"><p><em>float</em> – Taux de bonification.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -426,7 +458,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">nympe</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.nympe" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – nombre d’année pour calculé ympe moyen</p>
@@ -439,7 +471,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">reprate</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.reprate" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – taux de remplacement régime de base</p>
@@ -452,7 +484,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">reprate_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.reprate_s1" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – taux de remplacement régime supplémentaire 1</p>
@@ -465,7 +497,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">reprate_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.reprate_s2" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – taux de remplacement régime supplémentaire 1</p>
@@ -478,7 +510,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">droprate</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.droprate" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – taux d’année droppé</p>
@@ -491,7 +523,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">pu1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.pu1" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – PAS UTILISER</p>
@@ -534,7 +566,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">supp</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.supp" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – taux de bonification pour PRB sur régime de base</p>
@@ -547,7 +579,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">supp_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.supp_s1" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – taux de bonification pour PRB sur régime supplémentaire 1</p>
@@ -560,7 +592,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">supp_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.supp_s2" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – taux de bonification pour PRB sur régime supplémentaire 2</p>
@@ -573,7 +605,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">era</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.era" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – age minimum pour claimer</p>
@@ -586,7 +618,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">nra</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.nra" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – age « standard »</p>
@@ -599,7 +631,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">disab_rate</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.disab_rate" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – taux pour disability</p>
@@ -612,7 +644,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">disab_base</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.disab_base" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – Montant pour disability</p>
@@ -625,7 +657,7 @@ Fixe après 2025.</p>
 <code class="sig-name descname">cola</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.rules.cola" title="Lien permanent vers cette définition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du paramètre</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – taux d’indexation du YMPE</p>
@@ -656,7 +688,7 @@ Fixe après 2025.</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>year</strong> (<em>int</em>) – Année du paramètre</p></li>
+<li><p><strong>year</strong> (<em>int</em>) – année du paramètre</p></li>
 <li><p><strong>le benefice maximum éligible à une année</strong><strong> (</strong><strong>moyenne du YMPE des 5 dernière année</strong><strong> )</strong> (<em>calcule</em>) – </p></li>
 </ul>
 </dd>
@@ -686,11 +718,11 @@ instance de classe.</p>
 <dl class="method">
 <dt id="srpp.account.MakeContrib">
 <code class="sig-name descname">MakeContrib</code><span class="sig-paren">(</span><em class="sig-param">year</em>, <em class="sig-param">earn</em>, <em class="sig-param">earn_aut=0</em>, <em class="sig-param">kids=False</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.MakeContrib" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Ajoute une année de contribution (une instance de record dans la list des années de contribution)</p>
+<dd><p>Ajoute une année de cotisation (une instance de record dans la list des années de cotisation)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>year</strong> (<em>int</em>) – année de contribution</p></li>
+<li><p><strong>year</strong> (<em>int</em>) – année de cotisation</p></li>
 <li><p><strong>earn</strong> (<em>float</em>) – revenue d’emploi cotisable</p></li>
 <li><p><strong>earn_aut</strong> (<em>float</em>) – revenue autonome cotisable</p></li>
 <li><p><strong>kids</strong> (<em>boolean</em>) – </p></li>
@@ -706,7 +738,7 @@ instance de classe.</p>
 <dd><p>Effectue le claiming, appelle CalcAMPE() et CalcBenefit()</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de contribution</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de cotisation</p>
 </dd>
 </dl>
 </dd></dl>
@@ -764,12 +796,12 @@ instance de classe.</p>
 <dl class="method">
 <dt id="srpp.account.CalcPRB">
 <code class="sig-name descname">CalcPRB</code><span class="sig-paren">(</span><em class="sig-param">year</em>, <em class="sig-param">taxable</em>, <em class="sig-param">taxable_s2</em>, <em class="sig-param">earn</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.CalcPRB" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Calcule le Post retirement benefice quand une contribution est faite après avoir claimer.
+<dd><p>Calcule le Post retirement benefice quand une cotisation est faite après avoir claimer.
 Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>year</strong> (<em>int</em>) – année de la contribution</p></li>
+<li><p><strong>year</strong> (<em>int</em>) – année de la cotisation</p></li>
 <li><p><strong>taxable</strong> (<em>float</em>) – montant cotisable pour régime de base et supplémentaire 1</p></li>
 <li><p><strong>taxable_s2</strong> (<em>float</em>) – montant cotisable pour régime supplémentaire 2</p></li>
 </ul>
@@ -780,10 +812,10 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dl class="method">
 <dt id="srpp.account.gBenefit">
 <code class="sig-name descname">gBenefit</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.gBenefit" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Retourne le montant du bénéfice du régime de base à une année donnée</p>
+<dd><p>Retourne le montant de la prestation du régime de base à une année donnée</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du bénéfice</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de la prestation</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – bénéfice</p>
@@ -794,10 +826,10 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dl class="method">
 <dt id="srpp.account.gBenefit_s1">
 <code class="sig-name descname">gBenefit_s1</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.gBenefit_s1" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Retourne le montant du bénéfice du régime supplémentaire 1à une année donnée</p>
+<dd><p>Retourne le montant de la prestation du régime supplémentaire 1à une année donnée</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du bénéfice</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de la prestation</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – bénéfice</p>
@@ -808,10 +840,10 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dl class="method">
 <dt id="srpp.account.gBenefit_s2">
 <code class="sig-name descname">gBenefit_s2</code><span class="sig-paren">(</span><em class="sig-param">year</em><span class="sig-paren">)</span><a class="headerlink" href="#srpp.account.gBenefit_s2" title="Lien permanent vers cette définition">¶</a></dt>
-<dd><p>Retourne le montant du bénéfice du régime supplémentaire 2 à une année donnée</p>
+<dd><p>Retourne le montant de la prestation du régime supplémentaire 2 à une année donnée</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du bénéfice</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année de la prestation</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – bénéfice</p>
@@ -825,7 +857,7 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dd><p>Retourne le montant du PRB du régime de base à une année donnée</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du PRB</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du PRB</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – montant PRB</p>
@@ -839,7 +871,7 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dd><p>Retourne le montant du PRB du régime supplémentaire 1 à une année donnée</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du PRB</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du PRB</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – montant PRB</p>
@@ -853,7 +885,7 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 <dd><p>Retourne le montant du PRB du régime supplémentaire 2 à une année donnée</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres</dt>
-<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – Année du PRB</p>
+<dd class="field-odd"><p><strong>year</strong> (<em>int</em>) – année du PRB</p>
 </dd>
 <dt class="field-even">Renvoie</dt>
 <dd class="field-even"><p><em>float</em> – montant PRB</p>
@@ -891,7 +923,7 @@ Appelé par MakeContrib() qui calcule les paramêtres</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2020, Équipe IRE
+        &copy; Copyright 2020, Équipe IRE à HEC Montréal
 
     </p>
   </div>

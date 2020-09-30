@@ -19,13 +19,13 @@ class record:
     contrib : float
         cotisation au régime de base
     contrib_s1 : float
-        costisation au régime supplémentaire 1 (en lien avec la hausse du taux de remplacement)
+        cotisation au régime supplémentaire 1 (en lien avec la hausse du taux de remplacement)
     contrib_s2 : float
-        costisation au régime supplémentaire 2 (en lien avec la hausse du salaire admissible à 114% du MGA pré-réforme)
+        cotisation au régime supplémentaire 2 (en lien avec la hausse du salaire admissible à 114% du MGA pré-réforme)
     kids : boolean
-        présence d'enfants de moins de 7 ans; True seulemet pour la personne admissible à l'exemption pour soins aux enfants en bas âge
+        présence d'enfants de moins de 7 ans (True seulement pour la personne admissible à l'exemption pour soins aux enfants en bas âge); défaut=False
     disab : boolean
-        rente d'invalidité (non modélisée actuellement)
+        rente d'invalidité (non modélisée actuellement) si True, rente de retraite si False; défaut=False
     """
     def __init__(self,year,earn=0.0,contrib=0.0, contrib_s1=0.0, contrib_s2=0.0,
                       contrib_aut=0,contrib_aut_s1=0,contrib_aut_s2=0,kids=False,disab=False):
@@ -46,10 +46,12 @@ class rules:
 
     Une instance de cette classe charge soit les pamamètres pour le RRQ (qpp=True) ou pour le RPC (qpp=False). Les paramètres jusqu'en 2025 sont dans params/qpp_history.xlsx et params/cpp_history.xlsx. Passé 2025 les différentes fonctions de méthodes renvoient soit la valeur de 2025 ou la valeur actualisée, selon le paramètre. En général, pour accéder à un paramètre pour une année donnée il suffit d'appeler la fonction de méthode *rules.<param>(year)*.
 
+    On note que tous les taux de cotisation sont modélisés séparément, car les différentes composantes des cotisations sont traitées de façon différente sur le plan fiscal.
+
     Parameters
     __________
     qpp : boolean
-        True pour charger les paramètres du RRQ, False pour charger ceux du RPC
+        True pour charger les paramètres du RRQ, False pour charger ceux du RPC; défaut=True
 
     Attributes
     __________
@@ -58,9 +60,9 @@ class rules:
     wgr : float
         taux annuel d'augmentation du MGA
     lastyear : int
-        lastyear + 1: année à partir de laquelle *rules.cpi* et *rules.wgr sont utilisés à la place des valeurs du fichier de paramètres
+        lastyear + 1: année à partir de laquelle *rules.cpi* et *rules.wgr* sont utilisés à la place des valeurs du fichier de paramètres
     self.indexation : float(NxN)
-        tableau pré-calculé d'indexation de 1966 à 2100
+        tableau pré-calculé d'indexation des prestations de 1966 à 2100
     """
     def __init__(self,qpp=False):
         bnames = ['byear','era','nra','lra']
@@ -95,14 +97,18 @@ class rules:
 
     def ympe(self,year):
         """
+        MGA de base pour une année donnée.
+
+        Par défaut, indexé à *wgr* pour les années après 2025.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            MGA pour une année donné. Indexé à wgr pour les années > 2025
+            Montant du MGA de base.
         """
         if (year>self.lastyear):
             value = self.yrspars.loc[self.lastyear,'ympe']
@@ -112,29 +118,34 @@ class rules:
         return value
     def ympe_s2(self,year):
         """
+        Montant du MGA pour le régime supplémentaire pour une année donnée (0 avant 2024, indexé à *wgr* après 2025).
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-             Montant du MGA pour le régime supplémentaire. 0 avant 2024.
-             Indexé à wgr après 2025.
+             Montant du MGA pour le régime supplémentaire.
         """
         value = self.ympe(year)
         value *= self.yrspars.loc[min(year,self.stop),'ympe_s2']
         return value
     def exempt(self,year):
         """
+        Montant de l'exemption sur les gains cotisables.
+
+        Après 2025, maintenue fixe à sa valeur nominale de 2025.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            Montant de l'exemption. Fixe après 2025.
+            Montant de l'exemption.
 
         """
         if (year > self.stop):
@@ -144,14 +155,16 @@ class rules:
         return value
     def worktax(self,year):
         """
+        Taux de cotisation de l'employé au régime de base. Fixe après 2025.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            Taux de contribution de l'employé au régime de base. Fixe après 2025.
+            Taux de cotisation.
 
         """
 
@@ -162,14 +175,18 @@ class rules:
         return value
     def worktax_s1(self,year):
         """
+        Taux de cotisation de l'employé au régime supplémentaire 1.
+
+        Fixe après 2025.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            Taux de contribution de l'employé au régime supplémentaire 1. Fixe après 2025.
+            Taux de cotisation.
 
         """
         if (year > self.stop):
@@ -179,15 +196,18 @@ class rules:
         return value
     def worktax_s2(self,year):
         """
+        Taux de cotisation de l'employé au régime supplémentaire 1.
+
+        Fixe après 2025.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            Taux de contribution de l'employé au régime supplémentaire 2.
-            Fixe après 2025.
+            Taux de cotisation.
 
         """
         if (year > self.stop):
@@ -197,14 +217,18 @@ class rules:
         return value
     def empltax(self,year):
         """
+        Taux de cotisation de l'employeur au régime de base.
+
+        Fixe après 2025.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            Taux de contribution de l'employeur au régime de base. Fixe après 2025.
+            Taux de cotisation.
 
         """
         if (year > self.stop):
@@ -214,14 +238,18 @@ class rules:
         return value
     def empltax_s1(self,year):
         """
+        Taux de cotisation de l'employeur au régime supplémentaire 1.
+
+        Fixe après 2025.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            Taux de contribution de l'employeur au régime supplémentaire 1. Fixe après 2025.
+            Taux de cotisation.
 
         """
         if (year > self.stop):
@@ -231,59 +259,78 @@ class rules:
         return value
     def empltax_s2(self,year):
         """
+        Taux de cotisation de l'employeur au régime supplémentaire 2.
+
+        Fixe après 2025.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            Taux de contribution de l'employeur au régime supplémentaire 2.
-            Fixe après 2025.
+            Taux de cotisation.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'employer_s2']
         else :
             value = self.yrspars.loc[year,'employer_s2']
         return value
-    def tax(self,year):
-        """
-        Parameters
-        __________
-        year : int
-            Année du paramètre
-        Return
-        ______
-        float
-            Taux de contribution de l'employeur et de l'employé au régime de base.
-        """
-        return self.worktax(year)+self.empltax(year)
-    def tax_s1(self,year):
-        """
-        Return
-        ______
-        float
-            Taux de contribution de l'employeur et de l'employé au régime supplémentaire 1.
-        """
-        return self.worktax_s1(year)+self.empltax_s1(year)
-    def tax_s2(self,year):
-        """
-        Parameters
-        __________
-        year : int
-            Année du paramètre
-        Return
-        ______
-        float
-            Taux de contribution de l'employeur et de l'employé au régime supplémentaire 2.
-        """
-        return self.worktax_s2(year)+self.empltax_s2(year)
+    # def tax(self,year):
+    #     """
+    #     Taux de cotisation combiné de l'employeur et de l'employé au régime de base.
+    #
+    #     Parameters
+    #     __________
+    #     year : int
+    #         année du paramètre
+    #     Return
+    #     ______
+    #     float
+    #         Taux de cotisation.
+    #     """
+    #     return self.worktax(year)+self.empltax(year)
+    # def tax_s1(self,year):
+    #     """
+    #     Taux de cotisation combiné de l'employeur et de l'employé au régime supplémentaire 1.
+    #
+    #     Parameters
+    #     __________
+    #     year : int
+    #         année du paramètre
+    #     Return
+    #     ______
+    #     float
+    #         Taux de cotisation.
+    #     """
+    #     return self.worktax_s1(year)+self.empltax_s1(year)
+    # def tax_s2(self,year):
+    #     """
+    #     Taux de cotisation combiné de l'employeur et de l'employé au régime supplémentaire 2.
+    #
+    #     Parameters
+    #     __________
+    #     year : int
+    #         année du paramètre
+    #     Return
+    #     ______
+    #     float
+    #         Taux de cotisation.
+    #     """
+    #     return self.worktax_s2(year)+self.empltax_s2(year)
     def selftax(self,year):
         """
+        Taux de cotisation sur revenun de travail autonome au régime de base.
+
+        Parameters
+        __________
+        year : int
+            année du paramètre
         Return
         ______
         float
-            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime de base.
+            Taux de cotisation.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'selfemp']
@@ -292,14 +339,16 @@ class rules:
         return value
     def selftax_s1(self,year):
         """
+        Taux de cotisation sur revenun de travail autonome au régime supplémentaire 1.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime supplémentaire 1.
+            Taux de cotisation.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'selfemp_s1']
@@ -308,14 +357,16 @@ class rules:
         return value
     def selftax_s2(self,year):
         """
+        Taux de cotisation sur revenun de travail autonome au régime supplémentaire 2.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime supplémentaire 2.
+            Taux de cotisation.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'selfemp_s2']
@@ -324,14 +375,16 @@ class rules:
         return value
     def ca(self,year):
         """
+        Dans le RRQ, facteur d'ajustement en fonction du revenu de la réduction pour rente hâtive (débutant avant 65 ans).
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            nouveau facteur d'ajustement de la pénalité en fonction du revenu pour RRQ
+            Facteur d'ajustement.
         """
         if self.qpp:
             if (year > self.stop):
@@ -343,14 +396,16 @@ class rules:
         return value
     def arf(self,year):
         """
+        Taux de réduction des prestations pour un début avant 65 ans.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            taux pénalité avant 65
+            Taux de réduction.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'arf']
@@ -359,14 +414,16 @@ class rules:
         return value
     def drc(self,year):
         """
+        Taux de bonification des prestations pour un début après 65 ans.
+
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
-            taux bonification après 65
+            Taux de bonification.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'drc']
@@ -378,7 +435,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -395,7 +452,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
 
         Return
         ______
@@ -412,7 +469,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -428,7 +485,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -444,7 +501,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -455,64 +512,64 @@ class rules:
         else :
             value = self.yrspars.loc[year,'droprate']
         return value
-    def pu1(self,year):
-        """
-        Parameters
-        __________
-        year : int
-            Année du paramètre
-        Return
-        ______
-        float
-            PAS UTILISER
-        """
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
-        return self.yrspars.loc[yr,'pu1']
-    def pu2(self,year):
-        """
-        Return
-        ______
-        float
-            PAS UTILISER
-        """
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
-        return self.yrspars.loc[yr,'pu2']
-    def pu3(self,year):
-        """
-        Return
-        ______
-        float
-            PAS UTILISÉ
-        """
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
-        return self.yrspars.loc[yr,'pu3']
-    def pu4(self,year):
-        """
-        Return
-        ______
-        float
-            PAS UTILISÉ
-        """
-        if year > self.stop :
-            yr = self.stop
-        else:
-            yr = year
-        return self.yrspars.loc[yr,'pu4']
+    # def pu1(self,year):
+    #     """
+    #     Parameters
+    #     __________
+    #     year : int
+    #         année du paramètre
+    #     Return
+    #     ______
+    #     float
+    #         NE PAS UTILISER
+    #     """
+    #     if year > self.stop :
+    #         yr = self.stop
+    #     else:
+    #         yr = year
+    #     return self.yrspars.loc[yr,'pu1']
+    # def pu2(self,year):
+    #     """
+    #     Return
+    #     ______
+    #     float
+    #         NE PAS UTILISER
+    #     """
+    #     if year > self.stop :
+    #         yr = self.stop
+    #     else:
+    #         yr = year
+    #     return self.yrspars.loc[yr,'pu2']
+    # def pu3(self,year):
+    #     """
+    #     Return
+    #     ______
+    #     float
+    #         NE PAS UTILISER
+    #     """
+    #     if year > self.stop :
+    #         yr = self.stop
+    #     else:
+    #         yr = year
+    #     return self.yrspars.loc[yr,'pu3']
+    # def pu4(self,year):
+    #     """
+    #     Return
+    #     ______
+    #     float
+    #         NE PAS UTILISER
+    #     """
+    #     if year > self.stop :
+    #         yr = self.stop
+    #     else:
+    #         yr = year
+    #     return self.yrspars.loc[yr,'pu4']
     def supp(self,year):
         """
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -528,7 +585,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -544,7 +601,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -598,7 +655,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -614,7 +671,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -630,7 +687,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -646,7 +703,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -662,7 +719,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         Return
         ______
         float
@@ -695,7 +752,7 @@ class rules:
         Parameters
         __________
         year : int
-            Année du paramètre
+            année du paramètre
         calcule le benefice maximum éligible à une année (moyenne du YMPE des 5 dernière année )
         Return
         ______
@@ -753,12 +810,12 @@ class account:
 
     def MakeContrib(self,year,earn,earn_aut=0,kids=False):
         """
-        Ajoute une année de contribution (une instance de record dans la list des années de contribution)
+        Ajoute une année de cotisation (une instance de record dans la list des années de cotisation)
 
         Parameters
         __________
         year : int
-            année de contribution
+            année de cotisation
         earn : float
             revenue d'emploi cotisable
         earn_aut : float
@@ -821,7 +878,7 @@ class account:
         Parameters
         __________
         year : int
-            année de contribution
+            année de cotisation
         """
         currage = self.gAge(year)
         if self.claimage!=None:
@@ -1027,13 +1084,13 @@ class account:
             self.benefit_s2 = 0.0
     def CalcPRB(self,year,taxable,taxable_s2,earn):
         """
-        Calcule le Post retirement benefice quand une contribution est faite après avoir claimer.
+        Calcule le Post retirement benefice quand une cotisation est faite après avoir claimer.
         Appelé par MakeContrib() qui calcule les paramêtres
 
         Parameters
         __________
         year : int
-            année de la contribution
+            année de la cotisation
         taxable : float
             montant cotisable pour régime de base et supplémentaire 1
         taxable_s2 : float
@@ -1086,12 +1143,12 @@ class account:
                         self.prb_s2[index] = self.prb_s2[index-1]*(1+self.rules.cola(year+index))
     def gBenefit(self,year):
         """
-        Retourne le montant du bénéfice du régime de base à une année donnée
+        Retourne le montant de la prestation du régime de base à une année donnée
 
         Parameters
         __________
         year : int
-            Année du bénéfice
+            année de la prestation
         Return
         ______
         float
@@ -1104,12 +1161,12 @@ class account:
             return self.benefit
     def gBenefit_s1(self,year):
         """
-        Retourne le montant du bénéfice du régime supplémentaire 1à une année donnée
+        Retourne le montant de la prestation du régime supplémentaire 1à une année donnée
 
         Parameters
         __________
         year : int
-            Année du bénéfice
+            année de la prestation
         Return
         ______
         float
@@ -1122,12 +1179,12 @@ class account:
             return self.benefit_s1
     def gBenefit_s2(self,year):
         """
-        Retourne le montant du bénéfice du régime supplémentaire 2 à une année donnée
+        Retourne le montant de la prestation du régime supplémentaire 2 à une année donnée
 
         Parameters
         __________
         year : int
-            Année du bénéfice
+            année de la prestation
         Return
         ______
         float
@@ -1145,7 +1202,7 @@ class account:
         Parameters
         __________
         year : int
-            Année du PRB
+            année du PRB
         Return
         ______
         float
@@ -1164,7 +1221,7 @@ class account:
         Parameters
         __________
         year : int
-            Année du PRB
+            année du PRB
         Return
         ______
         float
@@ -1183,7 +1240,7 @@ class account:
         Parameters
         __________
         year : int
-            Année du PRB
+            année du PRB
         Return
         ______
         float
