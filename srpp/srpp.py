@@ -6,29 +6,26 @@ from os import path
 
 class record:
     """
-    Information pour une année.
+    Cette classe permet d'enregistrer une année d'information.
 
-    Cette classe permet d'enregistrer une année d'information. Les instances de 
-    cette classe sont regroupées dans la List account.history. Habituellement
-    l'utilisateur utilisera la méthode MakeContrib() de la classe account pour 
-    creer des record.
+    Les instances de cette classe sont regroupées dans la liste *account.history*. Habituellement l'utilisateur utilisera la fonction de méthode *MakeContrib* de la classe *account* (voir ci-dessous) pour créer des entrées.
 
     Parameters
     __________
     year : int
-        année de l'enregistrement
+        année de l'entrée
     earn : float
-        gain admissible
+        gains admissibles
     contrib : float
-        contribution au régime de base
+        cotisation au régime de base
     contrib_s1 : float
-        contribution au régime supplémentaire  pour la hausse du taux de remplacement
-    contrib_s2 : float 
-        contribution au régime supplémentaire  pour la hausse du salaire adminissible (114%MGA)
+        costisation au régime supplémentaire 1 (en lien avec la hausse du taux de remplacement)
+    contrib_s2 : float
+        costisation au régime supplémentaire 2 (en lien avec la hausse du salaire admissible à 114% du MGA pré-réforme)
     kids : boolean
-        enfants de moins de 7  True seulemet pour la personne admissible à l'exemption pour enfants
+        présence d'enfants de moins de 7 ans; True seulemet pour la personne admissible à l'exemption pour soins aux enfants en bas âge
     disab : boolean
-        pension d'invalidité
+        rente d'invalidité (non modélisée actuellement)
     """
     def __init__(self,year,earn=0.0,contrib=0.0, contrib_s1=0.0, contrib_s2=0.0,
                       contrib_aut=0,contrib_aut_s1=0,contrib_aut_s2=0,kids=False,disab=False):
@@ -45,31 +42,25 @@ class record:
 
 class rules:
     """
-    Règle des régimes RPC et RRQ
+    Classe contenant les règles du RPC et du RRQ.
 
-    Une instance de cette classe charge soit les pamamètres pour le 
-    RRQ (qpp=True) ou pour le RPC (qpp=False). Les paramètres jusqu'en 2025 sont
-    dans params/qpp_history.xlsx et params/cpp_history.xlsx. Passé 2025 les 
-    différentes méthodes retournent soit la valeur de 2025 ou la valeur actualisé, 
-    dépendant du paramètre. En générale pour accéder à un paramètre pour une année 
-    donnée il suffit d'appeler la méthode rules.<param>(year).
+    Une instance de cette classe charge soit les pamamètres pour le RRQ (qpp=True) ou pour le RPC (qpp=False). Les paramètres jusqu'en 2025 sont dans params/qpp_history.xlsx et params/cpp_history.xlsx. Passé 2025 les différentes fonctions de méthodes renvoient soit la valeur de 2025 ou la valeur actualisée, selon le paramètre. En général, pour accéder à un paramètre pour une année donnée il suffit d'appeler la fonction de méthode *rules.<param>(year)*.
 
     Parameters
     __________
     qpp : boolean
-        Prend la valeur True pour charger les paramètres de RRQ sinon charge RPC
-    
+        True pour charger les paramètres du RRQ, False pour charger ceux du RPC
+
     Attributes
     __________
     cpi : float
-        taux d'indexation
+        taux annuel d'indexation des prestations
     wgr : float
-        taux d'augmentation de YMPE
+        taux annuel d'augmentation du MGA
     lastyear : int
-        lastyear + 1 : année à partir de la quelle rules.cpi et rules.wgr est 
-        utilisé à la place des valeurs du fichier de paramètre.
+        lastyear + 1: année à partir de laquelle *rules.cpi* et *rules.wgr sont utilisés à la place des valeurs du fichier de paramètres
     self.indexation : float(NxN)
-        tableau pre-calculé d'indexation de 1966 à 2100    
+        tableau pré-calculé d'indexation de 1966 à 2100
     """
     def __init__(self,qpp=False):
         bnames = ['byear','era','nra','lra']
@@ -87,7 +78,7 @@ class rules:
             self.yrspars = pd.read_excel(params+'/qpp_history.xlsx',names=ynames)
         else :
             #No ca column in cpp
-            for i,name in enumerate(ynames):   
+            for i,name in enumerate(ynames):
                 if name == "ca":
                     ynames.pop(i)
             self.yrspars = pd.read_excel(params+'/cpp_history.xlsx',names=ynames)
@@ -101,7 +92,7 @@ class rules:
         for y in range(2100-1966):
             self.indexation[:,y] =  self.indexation[:,y] + self.cola(1966+y)
         self.indexation = np.cumprod((np.triu(self.indexation)-np.diag(np.diag(self.indexation))+ones_lower), axis=1)
-            
+
     def ympe(self,year):
         """
         Parameters
@@ -128,7 +119,7 @@ class rules:
         Return
         ______
         float
-             Montant du MGA pour le régime supplémentaire. 0 avant 2024. 
+             Montant du MGA pour le régime supplémentaire. 0 avant 2024.
              Indexé à wgr après 2025.
         """
         value = self.ympe(year)
@@ -195,7 +186,7 @@ class rules:
         Return
         ______
         float
-            Taux de contribution de l'employé au régime supplémentaire 2. 
+            Taux de contribution de l'employé au régime supplémentaire 2.
             Fixe après 2025.
 
         """
@@ -247,7 +238,7 @@ class rules:
         Return
         ______
         float
-            Taux de contribution de l'employeur au régime supplémentaire 2. 
+            Taux de contribution de l'employeur au régime supplémentaire 2.
             Fixe après 2025.
         """
         if (year > self.stop):
@@ -264,7 +255,7 @@ class rules:
         Return
         ______
         float
-            Taux de contribution de l'employeur et de l'employé au régime de base. 
+            Taux de contribution de l'employeur et de l'employé au régime de base.
         """
         return self.worktax(year)+self.empltax(year)
     def tax_s1(self,year):
@@ -272,7 +263,7 @@ class rules:
         Return
         ______
         float
-            Taux de contribution de l'employeur et de l'employé au régime supplémentaire 1. 
+            Taux de contribution de l'employeur et de l'employé au régime supplémentaire 1.
         """
         return self.worktax_s1(year)+self.empltax_s1(year)
     def tax_s2(self,year):
@@ -284,7 +275,7 @@ class rules:
         Return
         ______
         float
-            Taux de contribution de l'employeur et de l'employé au régime supplémentaire 2. 
+            Taux de contribution de l'employeur et de l'employé au régime supplémentaire 2.
         """
         return self.worktax_s2(year)+self.empltax_s2(year)
     def selftax(self,year):
@@ -292,7 +283,7 @@ class rules:
         Return
         ______
         float
-            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime de base. 
+            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime de base.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'selfemp']
@@ -308,7 +299,7 @@ class rules:
         Return
         ______
         float
-            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime supplémentaire 1. 
+            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime supplémentaire 1.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'selfemp_s1']
@@ -324,7 +315,7 @@ class rules:
         Return
         ______
         float
-            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime supplémentaire 2. 
+            Taux de contribution sur revenun d'emploi (travailleur autonome)  au régime supplémentaire 2.
         """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'selfemp_s2']
@@ -340,8 +331,8 @@ class rules:
         Return
         ______
         float
-            nouveau facteur d'ajustement de la pénalité en fonction du revenu pour RRQ 
-        """ 
+            nouveau facteur d'ajustement de la pénalité en fonction du revenu pour RRQ
+        """
         if self.qpp:
             if (year > self.stop):
                 value = self.yrspars.loc[self.stop,'ca']
@@ -360,7 +351,7 @@ class rules:
         ______
         float
             taux pénalité avant 65
-        """ 
+        """
         if (year > self.stop):
             value = self.yrspars.loc[self.stop,'arf']
         else :
@@ -400,12 +391,12 @@ class rules:
         return value
     def reprate(self,year):
         """
-        
+
         Parameters
         __________
         year : int
             Année du paramètre
-            
+
         Return
         ______
         float
@@ -473,7 +464,7 @@ class rules:
         Return
         ______
         float
-            PAS UTILISER 
+            PAS UTILISER
         """
         if year > self.stop :
             yr = self.stop
@@ -485,7 +476,7 @@ class rules:
         Return
         ______
         float
-            PAS UTILISER 
+            PAS UTILISER
         """
         if year > self.stop :
             yr = self.stop
@@ -497,7 +488,7 @@ class rules:
         Return
         ______
         float
-            PAS UTILISÉ 
+            PAS UTILISÉ
         """
         if year > self.stop :
             yr = self.stop
@@ -509,7 +500,7 @@ class rules:
         Return
         ______
         float
-            PAS UTILISÉ 
+            PAS UTILISÉ
         """
         if year > self.stop :
             yr = self.stop
@@ -525,7 +516,7 @@ class rules:
         Return
         ______
         float
-            taux de bonification pour PRB sur régime de base 
+            taux de bonification pour PRB sur régime de base
         """
         if year > self.stop :
             yr = self.stop
@@ -565,7 +556,7 @@ class rules:
             yr = year
         return self.yrspars.loc[yr,'supp_s2']
     # def survmax60(self,year):
-        
+
     #     if year > self.stop :
     #         yr = self.stop
     #     else:
@@ -611,7 +602,7 @@ class rules:
         Return
         ______
         float
-            age minimum pour claimer 
+            age minimum pour claimer
         """
         if year > self.stop :
             yr = self.stop
@@ -627,7 +618,7 @@ class rules:
         Return
         ______
         float
-            age "standard" 
+            age "standard"
         """
         if year > self.stop :
             yr = self.stop
@@ -643,7 +634,7 @@ class rules:
         Return
         ______
         float
-            taux pour disability 
+            taux pour disability
         """
         if year > self.stop :
             yr = self.stop
@@ -692,7 +683,7 @@ class rules:
             première année d'indexation
         stop : int
             dernière année d'indexation
- 
+
         Return
         ______
         float
@@ -709,7 +700,7 @@ class rules:
         Return
         ______
         float
-            
+
         """
         return np.mean([self.ympe(x) for x in [max(year-x,1966) for x in range(5)]])*self.reprate(year)/12
     # def chgpar(self,name,y0,y1,value):
@@ -728,9 +719,9 @@ class account:
     """
     Classe principal regroupant l'information sur un individu et comprenant les
     fonctions de calcul.
-    
+
     Principal interface avec le simulateur. Chaque individu simulé doit avoir une
-    instance de classe. 
+    instance de classe.
 
     Parameters
     __________
@@ -738,7 +729,7 @@ class account:
         année de naissance
     rules : rules
         une instance de la classe rules.
-    
+
     """
     def __init__(self,byear,rules=None):
         self.byear = byear
@@ -774,8 +765,8 @@ class account:
             revenue autonome cotisable
         kids : boolean
         enfants de moins de 7  True seulemet pour la personne admissible à l'exemption pour enfants
-        
-        
+
+
         """
         if year>=self.rules.start:
             if earn>=self.rules.ympe(year):
@@ -793,7 +784,7 @@ class account:
                 taxable_aut = earn_aut
                 if taxable >=self.rules.exempt(year):
                     taxable -= self.rules.exempt(year)
-                elif taxable + taxable_aut >=self.rules.exempt(year):                 
+                elif taxable + taxable_aut >=self.rules.exempt(year):
                     taxable_aut -= (self.rules.exempt(year)-taxable)
                     taxable = 0.0
                 else:
@@ -804,7 +795,7 @@ class account:
             contrib = self.rules.worktax(year) * taxable
             contrib_aut = self.rules.worktax(year) * taxable_aut * 2
             contrib_s1 = self.rules.worktax_s1(year) * taxable
-            contrib_aut_s1 = self.rules.worktax_s1(year) * taxable_aut * 2 
+            contrib_aut_s1 = self.rules.worktax_s1(year) * taxable_aut * 2
 
             taxable_s2 = np.min( [np.max([earn-self.rules.ympe(year),0.0]) , (self.rules.ympe_s2(year)-self.rules.ympe(year))])
             if taxable_s2>0.0:
@@ -822,7 +813,7 @@ class account:
                                         contrib_aut = contrib_aut,contrib_aut_s1 = contrib_aut_s1,contrib_aut_s2=contrib_aut_s2,kids=kids)
             if self.claimage!=None:
                 self.CalcPRB(year,taxable,taxable_s2,earn)
-            
+
     def ClaimCPP(self,year):
         """
         Effectue le claiming, appelle CalcAMPE() et CalcBenefit()
@@ -855,7 +846,7 @@ class account:
         __________
         year : int
             année
-        
+
         Return
         ______
         int
@@ -870,7 +861,7 @@ class account:
         __________
         year : int
             Âge
-        
+
         Return
         ______
         int
@@ -1029,7 +1020,7 @@ class account:
                 else :
                     self.benefit *= 1.0+drc*(age-nra)
                     self.benefit_s1 *= 1.0+drc*(age-nra)
-                    self.benefit_s2 *= 1.0+drc*(age-nra)              
+                    self.benefit_s2 *= 1.0+drc*(age-nra)
         else:
             self.benefit = 0.0
             self.benefit_s1 = 0.0
@@ -1054,7 +1045,7 @@ class account:
                                                   + taxable*self.rules.supp(year)/12)
                 self.prb_s1[self.gAge(year)-60+1] = (self.prb_s1[self.gAge(year)-60]*(1+self.rules.cola(year))+
                                                     taxable*self.rules.worktax_s1(year)*100*self.rules.supp_s1(year)/12)
-                self.prb_s2[self.gAge(year)-60+1] = (self.prb_s2[self.gAge(year)-60+1] + 
+                self.prb_s2[self.gAge(year)-60+1] = (self.prb_s2[self.gAge(year)-60+1] +
                                                      taxable_s2*self.rules.worktax_s2(year)*100*self.rules.supp_s2(year)/12)
                 if self.gAge(year)<69:
                     for index in range(self.gAge(year)-60+2,11):
@@ -1068,11 +1059,11 @@ class account:
                 arf = self.rules.arf(year)
                 drc = self.rules.drc(year)
                 age = self.gAge(year)
-                upe = np.min([earn,self.rules.ympe(year)]) 
+                upe = np.min([earn,self.rules.ympe(year)])
                 if upe<self.rules.exempt(year) : upe = 0
                 #upe_s2 Need to start only in 2024
                 upe_s2 = np.max([np.min([earn-self.rules.ympe(year),self.rules.ympe_s2(year)-self.rules.ympe(year)]),0.0])
-                #PRB base 
+                #PRB base
                 prb = upe/self.rules.ympe(year) * self.rules.ympe(year+1)*self.rules.supp(year)
                 # PRB S1
                 prb_s1 = upe/self.rules.ympe(year) * self.rules.ympe(year+1)*self.rules.worktax_s1(year)*100*self.rules.supp_s1(year)
@@ -1095,7 +1086,7 @@ class account:
                         self.prb_s2[index] = self.prb_s2[index-1]*(1+self.rules.cola(year+index))
     def gBenefit(self,year):
         """
-        Retourne le montant du bénéfice du régime de base à une année donnée 
+        Retourne le montant du bénéfice du régime de base à une année donnée
 
         Parameters
         __________
@@ -1113,7 +1104,7 @@ class account:
             return self.benefit
     def gBenefit_s1(self,year):
         """
-        Retourne le montant du bénéfice du régime supplémentaire 1à une année donnée 
+        Retourne le montant du bénéfice du régime supplémentaire 1à une année donnée
 
         Parameters
         __________
@@ -1131,7 +1122,7 @@ class account:
             return self.benefit_s1
     def gBenefit_s2(self,year):
         """
-        Retourne le montant du bénéfice du régime supplémentaire 2 à une année donnée 
+        Retourne le montant du bénéfice du régime supplémentaire 2 à une année donnée
 
         Parameters
         __________
@@ -1149,7 +1140,7 @@ class account:
             return self.benefit_s2
     def gPRB(self,year):
         """
-        Retourne le montant du PRB du régime de base à une année donnée 
+        Retourne le montant du PRB du régime de base à une année donnée
 
         Parameters
         __________
@@ -1160,7 +1151,7 @@ class account:
         float
             montant PRB
         """
-        if self.gAge(year)<60 : 
+        if self.gAge(year)<60 :
             return 0.0
         elif  self.gAge(year)<self.gAge(year)<=70:
             return self.prb[self.gAge(year)-60]
@@ -1168,7 +1159,7 @@ class account:
             return self.prb[10]*self.rules.gIndexation(self.gYear(70),year)
     def gPRB_s1(self,year):
         """
-        Retourne le montant du PRB du régime supplémentaire 1 à une année donnée 
+        Retourne le montant du PRB du régime supplémentaire 1 à une année donnée
 
         Parameters
         __________
@@ -1179,15 +1170,15 @@ class account:
         float
             montant PRB
         """
-        if self.gAge(year)<60 : 
+        if self.gAge(year)<60 :
             return 0.0
         elif  self.gAge(year)<self.gAge(year)<=70:
             return self.prb_s1[self.gAge(year)-60]
         else :
-            return self.prb_s1[10]*self.rules.gIndexation(self.gYear(70),year)    
+            return self.prb_s1[10]*self.rules.gIndexation(self.gYear(70),year)
     def gPRB_s2(self,year):
         """
-        Retourne le montant du PRB du régime supplémentaire 2 à une année donnée 
+        Retourne le montant du PRB du régime supplémentaire 2 à une année donnée
 
         Parameters
         __________
@@ -1198,12 +1189,12 @@ class account:
         float
             montant PRB
         """
-        if self.gAge(year)<60 : 
+        if self.gAge(year)<60 :
             return 0.0
         elif  self.gAge(year)<self.gAge(year)<=70:
             return self.prb_s2[self.gAge(year)-60]
         else :
-            return self.prb_s2[10]*self.rules.gIndexation(self.gYear(70),year) 
+            return self.prb_s2[10]*self.rules.gIndexation(self.gYear(70),year)
 
     def RunCase(self,claimage=65):
         yr18 = np.max([self.gYear(18),self.rules.start])
@@ -1234,9 +1225,9 @@ class account:
                 self.ratio_list[i] = temp_list[0]
                 niter += 1
         return
-    
+
     def SetHistory_fam(self, claimage = 65, age_birth=[]):
-        self.age_birth = age_birth       
+        self.age_birth = age_birth
         yr18 = np.max([self.gYear(18),self.rules.start])
         start_age = self.gAge(yr18)
         nyears = claimage - start_age

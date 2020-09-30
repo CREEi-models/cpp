@@ -6,7 +6,7 @@
 Simulateur de revenu de pensions publiques (SRPP)
 ==================================================================================
 
-Le Simulateur de revenu de pensions publiques (SRPP) simule le Régime de rentes du Québec (RRQ) ainsi que le Régime de pensions du Canada (RPC). Le simulateur a été mis au point par l'équipe de `l'Institut sur la retraite et l'épargne <https://ire.hec.ca>`_ à `HEC Montréal <https://www.hec.ca>`_.
+Le Simulateur de revenu de pensions publiques (SRPP) simule les prestations de retraite du Régime de rentes du Québec (RRQ) et du Régime de pensions du Canada (RPC). Le simulateur a été mis au point par l'équipe de `l'Institut sur la retraite et l'épargne <https://ire.hec.ca>`_ à `HEC Montréal <https://www.hec.ca>`_.
 
 Le simulateur est entièrement programmé en Python et est utilisé à diverses fins d'enseignement ou de recherche, y compris par d'autres simulateurs de l'IRE et des chaires qu'il supporte.
 

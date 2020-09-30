@@ -7,7 +7,7 @@ Personne-contact
 
 Contributeurs
 ************************
-Yann Décarie, François Laliberté-Auger Pierre-Carl Michaud
+Yann Décarie, François Laliberté-Auger, Pierre-Carl Michaud
 
 Droits d'utilisation
 ********************
