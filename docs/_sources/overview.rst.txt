@@ -9,7 +9,7 @@ Premiers pas avec le SRPP
 Installation du SRPP
 ====================
 
-On peut installer facilement le SRP à l'aide de pip:
+On peut installer facilement le SRPP à l'aide de pip::
 
   pip install srpp
 
@@ -20,13 +20,13 @@ Dans un notebook ou un projet, on invoque le SRPP en ajoutant la commande suivan
     import srpp
 
 
-Pour l'installer afin de le modifier, il faut d'abord aller le chercher sur Github:
+Pour l'installer afin de le modifier, il faut d'abord aller le chercher sur Github::
 
   git clone https://github.com/creei-models/srpp
 
 
-Ensuite on peut l'installer en allant dans srpp/ et en lançant au terminal:
+Ensuite on peut l'installer en allant dans srpp/ et en lançant au terminal::
 
-  python setup.py install -e
+  pip install -e .
 
 Les modifications apportées affecteront directement le fichier installé. Il est fortement recommandé de procéder à l'installation de développement dans un environnement (p.ex. `conda environment <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_)

@@ -12,7 +12,7 @@ Le simulateur est entièrement programmé en Python et est utilisé à diverses 
 
 .. toctree::
    :maxdepth: 1
-   :caption: Menu:
+   :caption: Menu
 
    overview.rst
    code.rst
@@ -20,6 +20,6 @@ Le simulateur est entièrement programmé en Python et est utilisé à diverses 
 
 
 Index
-==================
+=====
 
 * :ref:`genindex`
