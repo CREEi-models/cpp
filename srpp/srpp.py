@@ -77,20 +77,19 @@ class rules:
 			 'survrate1', 'survrate2','era','nra','lra','supp','disab_rate','disab_base','cola',
                  'ympe_s2','worker_s1','employer_s1','worker_s2','employer_s2','selfemp_s1','selfemp_s2',
                  'reprate_s1', 'reprate_s2','supp_s1','supp_s2']
-
         self.qpp = qpp
         self.start = 1966
         self.start_s1= 2019
         self.start_s2= 2024
         params = path.join(path.dirname(__file__), 'params')
         if (self.qpp==True):
-            self.yrspars = pd.read_csv(params+'/qpp_history.csv',header=0)
+            self.yrspars = pd.read_excel(params+'/qpp_history.xlsx',names=ynames)
         else :
             #No ca column in cpp
-            #for i,name in enumerate(ynames):
-            #    if name == "ca":
-            #        ynames.pop(i)
-            self.yrspars = pd.read_csv(params+'/cpp_history.csv',header=0)
+            for i,name in enumerate(ynames):
+                if name == "ca":
+                    ynames.pop(i)
+            self.yrspars = pd.read_excel(params+'/cpp_history.xlsx',names=ynames)
         self.stop  = np.max(self.yrspars['year'].values)
         self.yrspars = self.yrspars.set_index('year')
         self.cpi = 0.02
