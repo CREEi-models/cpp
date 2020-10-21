@@ -1,13 +1,15 @@
 Contacts et droits d'utilisation
 ================================
 
+.. _nous_contacter: 
+
 Personne-contact
 ****************
 `François Laliberté-Auger <francois.laliberte-auger@hec.ca>`_
 
 Contributeurs
 ************************
-Yann Décarie, François Laliberté-Auger, Pierre-Carl Michaud
+David Boisclair, Yann Décarie, François Laliberté-Auger, Pierre-Carl Michaud, Pierre-Yves Yanni
 
 Droits d'utilisation
 ********************
