@@ -1,0 +1,32 @@
+.. Python cpp calculator documentation master file, created by
+   sphinx-quickstart on Tue Apr  7 16:11:25 2020.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Simulateur de régimes de pensions publiques (SRPP)
+==================================================================================
+
+Le Simulateur de régimes de pensions publiques (SRPP) simule les prestations de retraite du Régime de rentes du Québec (RRQ) et du Régime de pensions du Canada (RPC) et les cotisations à ces régimes. Le simulateur a été mis au point par l'équipe de `l'Institut sur la retraite et l'épargne <https://ire.hec.ca>`_ à `HEC Montréal <https://www.hec.ca>`_.
+
+Le simulateur est entièrement programmé en Python et est utilisé à diverses fins d'enseignement ou de recherche, y compris par d'autres simulateurs de l'IRE et des chaires qu'il supporte. Il simule les cotisations et les prestations -- basées sur l'historique de cotisations et sur les règles principales des programmes -- sur une base annuelle (contrairement aux véritables programmes, qui fonctionnent sur base mensuelle).
+
+Le SRPP est écrit en langage Python, un langage simple, rapide et moderne. Afin de pouvoir l’utiliser, il faut s’assurer d’avoir au préalable installé une distribution à jour de Python, par exemple à l’aide `d'Anaconda <https://www.anaconda.com/products/individual>`_. Dans tous les cas, les exigences minimales pour utiliser le SRPP sont Python 3.6+ avec numpy, pandas et xlrd. Bien que ce ne soit pas essentiel, il sera également utile de se familiariser un minimum, au préalable, avec le fonctionnement des environnements Python et avec le vocabulaire utilisé dans la présente documentation (p.ex. fonction, classe, instance, profil).
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Menu
+
+   overview.rst
+   code.rst
+   credits.rst
+
+
+Index
+=====
+
+* :ref:`genindex`
+
+Documentation SRPP en PDF
+==============================
+
+Documentation :download:`pdf <build/latex/SRPP.pdf>`
