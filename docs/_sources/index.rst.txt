@@ -25,3 +25,8 @@ Index
 =====
 
 * :ref:`genindex`
+
+Documentation SRPP en PDF
+==============================
+
+Documentation :download:`pdf <build/latex/SRPP.pdf>`
