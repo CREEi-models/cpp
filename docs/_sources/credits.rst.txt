@@ -1,7 +1,7 @@
 Contacts et droits d'utilisation
 ================================
 
-.. _nous_contacter: 
+.. _nous_contacter:
 
 Personne-contact
 ****************
@@ -9,7 +9,7 @@ Personne-contact
 
 Contributeurs
 ************************
-David Boisclair, Yann Décarie, François Laliberté-Auger, Pierre-Carl Michaud, Pierre-Yves Yanni
+David Boisclair, Nicholas-James Clavet, Yann Décarie, Roger Edindali Emone, François Laliberté-Auger, Pierre-Carl Michaud
 
 Droits d'utilisation
 ********************
