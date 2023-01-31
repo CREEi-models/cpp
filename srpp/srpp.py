@@ -1159,6 +1159,8 @@ class account:
                 #PRB S2
                 if upe_s2>0:
                     prb_s2 = upe_s2/(self.rules.ympe_s2(year)-self.rules.ympe(year))*(self.rules.ympe_s2(year+1)-self.rules.ympe(year+1)) * self.rules.supp_s1(year)
+                else:
+                    prb_s2 = 0.0
                 #Ajustment factor
                 if (age<nra):
                     self.prb[self.gAge(year)-60+1] = self.prb[self.gAge(year)-60]*(1+self.rules.cola(year)) + (1.0+arf*(age-nra)) * prb/12
