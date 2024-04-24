@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="srpp",
-    version="0.6.3",
+    version="0.6.5",
     author="Francois Laliberte-Auger, Nicholas-James Clavet, Pierre-Carl Michaud",
     author_email="francois.laliberte-auger@hec.ca",
     description="Module pour simuler prestations pensions publiques Canada",
